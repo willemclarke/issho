@@ -2,15 +2,15 @@
   "compilerOptions": {
     "baseUrl": "./src",
     "jsx": "react",
-    "moduleResolution": "Node",
     "paths": {
       "~*": ["./*"]
     },
+    "outDir": "dist/server",
     "strict": true,
     "target": "ES2016",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "typeRoots": ["./node_modules/@types"]
+    "moduleResolution": "node"
   },
   "include": ["src/**/*"]
 }
