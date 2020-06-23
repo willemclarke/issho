@@ -10,9 +10,7 @@ interface Props {
 
 export const Room = (props: Props) => {
   const { socket } = props;
-  console.log(socket, 'socket log, room.tsx');
   const { roomId } = useParams();
-  console.log(roomId, 'useParams, Room.tsx log');
   const username = useQuery().get('username');
 
   const [roomStatus, setRoomStatus] = React.useState<RoomStatus | null>(null);
@@ -27,6 +25,7 @@ export const Room = (props: Props) => {
   socket.on(Messages.ROOM_STATUS, (status) => {
     setRoomStatus(status);
   });
+  console.log(roomStatus, 'ROOM STATUS');
 
   return (
     <div>

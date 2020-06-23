@@ -15,7 +15,7 @@ io.on('connection', (socket: Socket) => {
 
   socket.on(Messages.JOIN_ROOM, (info) => {
     console.log('User joined', info);
-    socket.join(info.roomId); //roomId not defined atm
+    socket.join(info.roomId);
 
     id = info.roomId;
     users.push({ username: info.username });
@@ -30,12 +30,12 @@ io.on('connection', (socket: Socket) => {
   socket.on('disconnect', () => {
     console.log('User disconnected');
   });
+});
 
-  app.get('/', (req: Request, res: Response) => {
-    res.send('Hello World');
-  });
+app.get('/', (req: Request, res: Response) => {
+  res.send('Hello World');
+});
 
-  http.listen(port, () => {
-    console.log(`gurupu listening at http://localhost:${port}`);
-  });
+http.listen(port, () => {
+  console.log(`gurupu listening at http://localhost:${port}`);
 });
