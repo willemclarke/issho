@@ -11,7 +11,7 @@ export const App = () => {
 
   return (
     <Router>
-      <Layout>
+      <Layout style={{ height: '100vh', backgroundColor: 'white' }}>
         <NavBar />
         <Switch>
           <Route exact path="/">
