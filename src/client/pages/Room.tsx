@@ -23,12 +23,13 @@ export const Room = (props: Props) => {
   }, []);
 
   socket.on(Messages.ROOM_STATUS, (status) => {
+    console.log(status);
     setRoomStatus(status);
   });
-  console.log(roomStatus, 'ROOM STATUS');
 
   return (
     <div>
+      Room status:
       <pre>{JSON.stringify(roomStatus, null, 2)}</pre>
     </div>
   );

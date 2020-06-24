@@ -20,11 +20,10 @@ io.on('connection', (socket: Socket) => {
     id = info.roomId;
     users.push({ username: info.username });
 
-    socket.emit(Messages.ROOM_STATUS),
-      {
-        users: users,
-        id: id,
-      };
+    socket.emit(Messages.ROOM_STATUS, {
+      users: users,
+      id: id,
+    });
   });
 
   socket.on('disconnect', () => {

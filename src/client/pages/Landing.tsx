@@ -4,9 +4,7 @@ import { Button, Input, Form } from 'antd';
 
 export const Landing = () => {
   const [username, setUsername] = React.useState('');
-  console.log(username, 'USERNAME - Landing.tsx');
   const [roomId, setRoomId] = React.useState('');
-  console.log(roomId, 'ROOM ID - Landing.tsx');
   const history = useHistory();
 
   const onJoin = () => {
