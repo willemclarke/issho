@@ -17,8 +17,13 @@ function getUser(socket: GurupuSocket): User {
 }
 
 function getUsers(sockets: { [id: string]: GurupuSocket }): User[] {
-  // Not using (_lodash) map due to type inference issues on overload
-  return Object.entries(sockets).map(([id, socket]) => getUser(socket));
+  // Not using (_lodash) map due to type inference issues on overload.
+  // Using _.compact as some sockets don't have users
+  return _.compact(Object.entries(sockets).map(([id, socket]) => getUser(socket)));
+}
+
+function getUsersForRoom(roomId: string, users: User[]): User[] {
+  return _.filter(users, (user) => user.roomId === roomId);
 }
 
 io.on('connection', (socket: GurupuSocket) => {
@@ -32,9 +37,10 @@ io.on('connection', (socket: GurupuSocket) => {
 
     const sockets = io.sockets.sockets as { [id: string]: GurupuSocket };
     const users = getUsers(sockets);
+    const usersInRoom = getUsersForRoom(roomId, users);
     const roomStatus: RoomStatus = {
       id: roomId,
-      users,
+      users: usersInRoom,
     };
 
     socket.emit(Messages.ROOM_STATUS, roomStatus);
