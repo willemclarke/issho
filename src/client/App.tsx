@@ -15,7 +15,7 @@ export const App = () => {
         <NavBar />
         <Switch>
           <Route exact path="/">
-            <Landing />
+            <Landing socket={socket} />
           </Route>
           <Route exact path="/rooms/:roomId">
             <Room socket={socket} />

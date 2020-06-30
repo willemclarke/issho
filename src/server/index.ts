@@ -26,21 +26,44 @@ function getUsersForRoom(roomId: string, users: User[]): User[] {
   return _.filter(users, (user) => user.roomId === roomId);
 }
 
+function getSockets(): { [id: string]: GurupuSocket } {
+  return io.sockets.sockets as { [id: string]: GurupuSocket };
+}
+
 io.on('connection', (socket: GurupuSocket) => {
   socket.on(Messages.JOIN_ROOM, async (info) => {
     console.log('User joined', info);
 
     const { roomId, username } = info;
 
-    socket.join(roomId);
-    socket.user = { roomId, username };
+    const existingSockets = getSockets();
+    const existingUsers = getUsers(existingSockets);
+    const existingUsersInRoom = getUsersForRoom(roomId, existingUsers);
+    const existingUser = _.find(existingUsersInRoom, (user) => user.username === username);
 
-    const sockets = io.sockets.sockets as { [id: string]: GurupuSocket };
+    if (existingUser) {
+      return socket.emit(Messages.INVALID_JOIN_ROOM, {
+        errorMessage: `User ${username} already exists within the room: ${roomId}, please choose another username `,
+      });
+    }
+
+    socket.user = { roomId, username };
+    socket.join(roomId);
+
+    socket.emit(Messages.VALIDATED_JOIN_ROOM, true);
+  });
+
+  socket.on(Messages.JOINED_ROOM, (info) => {
+    console.log('User joined room');
+
+    const { roomId } = info;
+
+    const sockets = getSockets();
     const users = getUsers(sockets);
-    const usersInRoom = getUsersForRoom(roomId, users);
+
     const roomStatus: RoomStatus = {
       id: roomId,
-      users: usersInRoom,
+      users,
     };
 
     socket.emit(Messages.ROOM_STATUS, roomStatus);
