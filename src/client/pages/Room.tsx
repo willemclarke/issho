@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Socket } from 'socket.io';
 import { useQuery } from '../hooks/useQuery';
 import { RoomStatus, Messages } from '../../common/types';
+import _ from 'lodash';
 
 interface Props {
   socket: Socket;
@@ -14,18 +15,22 @@ export const Room = (props: Props) => {
   const username = useQuery().get('username');
 
   const [roomStatus, setRoomStatus] = React.useState<RoomStatus | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    socket.emit(Messages.JOIN_ROOM, {
+    socket.emit(Messages.JOINED_ROOM, {
       roomId,
       username,
     });
   }, []);
 
   socket.on(Messages.ROOM_STATUS, (status) => {
-    console.log(status);
     setRoomStatus(status);
   });
+
+  // if (error) {
+  //    handle error;
+  // }
 
   return (
     <div>
