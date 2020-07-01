@@ -1,9 +1,11 @@
 import React from 'react';
+import _ from 'lodash';
 import { useParams } from 'react-router-dom';
 import { Socket } from 'socket.io';
 import { useQuery } from '../hooks/useQuery';
 import { RoomStatus, Messages } from '../../common/types';
-import _ from 'lodash';
+import { Spin } from 'antd';
+import { UserList } from '../components/room/UserList';
 
 interface Props {
   socket: Socket;
@@ -25,17 +27,18 @@ export const Room = (props: Props) => {
   }, []);
 
   socket.on(Messages.ROOM_STATUS, (status) => {
+    console.log(status, 'got a status');
     setRoomStatus(status);
   });
 
-  // if (error) {
-  //    handle error;
-  // }
-
+  if (!roomStatus) {
+    return <Spin />;
+  }
   return (
     <div>
-      Room status:
-      <pre>{JSON.stringify(roomStatus, null, 2)}</pre>
+      <h2>Room status:</h2>
+      <UserList users={roomStatus.users} />
+      {/* <pre>{JSON.stringify(roomStatus, null, 2)}</pre> */}
     </div>
   );
 };

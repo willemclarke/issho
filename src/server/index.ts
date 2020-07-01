@@ -66,7 +66,8 @@ io.on('connection', (socket: GurupuSocket) => {
       users,
     };
 
-    socket.emit(Messages.ROOM_STATUS, roomStatus);
+    // Since sockets are 1:1, emit the roomstatus to all users
+    _.each(sockets, (sock) => sock.emit(Messages.ROOM_STATUS, roomStatus));
   });
 
   socket.on('disconnect', () => {
