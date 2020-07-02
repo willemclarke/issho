@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import socketio, { Socket, Namespace } from 'socket.io';
+import socketio, { Socket } from 'socket.io';
 import { Messages, User, RoomStatus } from '../common/types';
 import _ from 'lodash';
 
@@ -68,6 +68,12 @@ io.on('connection', (socket: GurupuSocket) => {
 
     // Since sockets are 1:1, emit the roomstatus to all users
     _.each(sockets, (sock) => sock.emit(Messages.ROOM_STATUS, roomStatus));
+  });
+
+  socket.on(Messages.SEND_ROOM_VIDEO_STATE, (info) => {
+    console.log(info, 'INFO INFO INFO');
+
+    socket.to(info.id).emit(Messages.SYNCED_ROOM_VIDEO_STATE, info);
   });
 
   socket.on('disconnect', () => {
