@@ -20,5 +20,10 @@ export const UserList = (props: Props) => {
     );
   });
 
-  return <div>{userList}</div>;
+  return (
+    <div>
+      <h2>Connected users:</h2>
+      {userList}
+    </div>
+  );
 };
