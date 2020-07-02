@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactPlayer from 'react-player';
 import _ from 'lodash';
-import { Button } from 'antd';
 import { VideoState } from '../../../common/types';
+import { CommandBar } from './CommandBar';
 
 export const VideoPlayer = () => {
   const [state, setState] = React.useState<VideoState>({
@@ -26,7 +26,6 @@ export const VideoPlayer = () => {
       url,
       played: 0,
       loaded: 0,
-      pip: false,
     });
   };
 
@@ -47,16 +46,6 @@ export const VideoPlayer = () => {
     }));
   };
 
-  const commandBar = () => {
-    return (
-      <div style={{ backgroundColor: '#121212', padding: '5px' }}>
-        <Button type="primary" onClick={handlePlayAndPause}>
-          {state.playing ? 'Pause' : 'Play'}
-        </Button>
-      </div>
-    );
-  };
-
   return (
     <>
       <ReactPlayer
@@ -72,7 +61,7 @@ export const VideoPlayer = () => {
           },
         }}
       />
-      {commandBar()}
+      <CommandBar handlePlayAndPause={handlePlayAndPause} playing={state.playing} />
     </>
   );
 };
