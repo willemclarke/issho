@@ -28,17 +28,17 @@ export const Room = (props: Props) => {
   }, []);
 
   socket.on(Messages.ROOM_STATUS, (status) => {
-    console.log(status, 'got a status');
     setRoomStatus(status);
   });
 
   if (!roomStatus) {
     return <Spin />;
   }
+
   return (
     <Row style={{ height: '100%' }}>
       <Col span={18} style={{ backgroundColor: '#ededed', padding: '10px' }}>
-        <VideoPlayer />
+        <VideoPlayer socket={socket} roomId={roomId} />
         <UserList users={roomStatus.users} />
       </Col>
       <Col span={6} style={{ backgroundColor: '#ffffff' }}></Col>

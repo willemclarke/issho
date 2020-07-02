@@ -1,17 +1,24 @@
 import React from 'react';
 import ReactPlayer from 'react-player';
-import _ from 'lodash';
-import { VideoState } from '../../../common/types';
+import { Socket } from 'socket.io';
+import { VideoState, RoomVideoState, Messages } from '../../../common/types';
 import { CommandBar } from './CommandBar';
 
-export const VideoPlayer = () => {
+interface Props {
+  socket: Socket;
+  roomId: string;
+}
+
+export const VideoPlayer = (props: Props) => {
+  const { socket, roomId } = props;
+
   const [state, setState] = React.useState<VideoState>({
     url: null,
     pip: false,
     playing: false,
     controls: false,
     light: false,
-    volume: false,
+    volume: 0.8,
     muted: false,
     played: 0,
     loaded: 0,
@@ -20,14 +27,22 @@ export const VideoPlayer = () => {
     loop: false,
   });
 
-  const load = (url: string) => {
-    return setState({
-      ...state,
-      url,
-      played: 0,
-      loaded: 0,
+  const [lastSyncedAt, setLastSyncedAt] = React.useState(new Date().valueOf());
+
+  React.useEffect(() => {
+    socket.on(Messages.SYNCED_ROOM_VIDEO_STATE, (data: RoomVideoState) => {
+      console.log(data, 'recieved date on synced_room_video_state');
+      const { playing } = data;
+      setState({
+        ...state,
+        playing: playing,
+      });
     });
-  };
+  }, []);
+
+  React.useEffect(() => {
+    syncVideoPlayerState();
+  }, [lastSyncedAt]);
 
   const handlePlay = () => {
     console.log('onPlay');
@@ -40,10 +55,20 @@ export const VideoPlayer = () => {
   };
 
   const handlePlayAndPause = () => {
-    setState((prevState: VideoState) => ({
-      ...prevState,
-      playing: !prevState.playing,
-    }));
+    setState((prevState: VideoState) => {
+      return {
+        ...prevState,
+        playing: !prevState.playing,
+      };
+    });
+    setLastSyncedAt(new Date().valueOf());
+  };
+
+  const syncVideoPlayerState = () => {
+    socket.emit(Messages.SEND_ROOM_VIDEO_STATE, {
+      playing: state.playing,
+      id: roomId,
+    });
   };
 
   return (
