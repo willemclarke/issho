@@ -1,84 +1,58 @@
 import express, { Request, Response } from 'express';
 import socketio, { Socket } from 'socket.io';
-import { Messages, User, RoomStatus } from '../common/types';
+import { Messages, User, RoomStatus, IsshoSocket } from '../common/types';
 import _ from 'lodash';
-
-interface GurupuSocket extends Socket {
-  user: User;
-}
 
 const app = express();
 const http = require('http').createServer(app);
 const io = socketio(http);
 const port = 3000;
 
-function getUser(socket: GurupuSocket): User {
-  return socket.user;
-}
+const getRoomStatus = (roomId: string): RoomStatus => {
+  const sockets = io.sockets.sockets as { [id: string]: IsshoSocket };
+  const users = _.compact(Object.entries(sockets).map(([id, socket]) => socket.user));
+  const usersInRoom = _.filter(users, (user) => user.roomId === roomId);
 
-function getUsers(sockets: { [id: string]: GurupuSocket }): User[] {
-  // Not using (_lodash) map due to type inference issues on overload.
-  // Using _.compact as some sockets don't have users
-  return _.compact(Object.entries(sockets).map(([id, socket]) => getUser(socket)));
-}
+  return {
+    id: roomId,
+    users: usersInRoom,
+  };
+};
 
-function getUsersForRoom(roomId: string, users: User[]): User[] {
-  return _.filter(users, (user) => user.roomId === roomId);
-}
-
-function getSockets(): { [id: string]: GurupuSocket } {
-  return io.sockets.sockets as { [id: string]: GurupuSocket };
-}
-
-io.on('connection', (socket: GurupuSocket) => {
+io.on('connection', (socket: IsshoSocket) => {
   socket.on(Messages.JOIN_ROOM, async (info) => {
-    console.log('User joined', info);
-
     const { roomId, username } = info;
+    const roomStatus = getRoomStatus(roomId);
 
-    const existingSockets = getSockets();
-    const existingUsers = getUsers(existingSockets);
-    const existingUsersInRoom = getUsersForRoom(roomId, existingUsers);
-    const existingUser = _.find(existingUsersInRoom, (user) => user.username === username);
-
+    const existingUser = _.find(roomStatus.users, (user) => user.username === username);
     if (existingUser) {
       return socket.emit(Messages.INVALID_JOIN_ROOM, {
         errorMessage: `User ${username} already exists within the room: ${roomId}, please choose another username `,
       });
     }
 
+    // Join the room in SocketIO land
     socket.user = { roomId, username };
     socket.join(roomId);
 
-    socket.emit(Messages.VALIDATED_JOIN_ROOM, true);
-  });
-
-  socket.on(Messages.JOINED_ROOM, (info) => {
-    console.log('User joined room');
-
-    const { roomId } = info;
-
-    const sockets = getSockets();
-    const users = getUsers(sockets);
-
-    const roomStatus: RoomStatus = {
-      id: roomId,
-      users,
-    };
-
-    // Since sockets are 1:1, emit the roomstatus to all users
-    _.each(sockets, (sock) => sock.emit(Messages.ROOM_STATUS, roomStatus));
+    // Send room status back to ALL clients
+    io.in(roomId).emit(Messages.ROOM_STATUS, getRoomStatus(roomId));
   });
 
   socket.on(Messages.SEND_ROOM_VIDEO_STATE, (info) => {
-    console.log(info, 'INFO INFO INFO');
-
+    console.log('HERE', info);
     socket.to(info.id).emit(Messages.SYNCED_ROOM_VIDEO_STATE, info);
   });
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
+  socket.on('disconnecting', () => {
+    _.each(Object.keys(socket.rooms), (roomId) => {
+      socket.leave(roomId, () => {
+        io.in(roomId).emit(Messages.ROOM_STATUS, getRoomStatus(roomId));
+      });
+    });
   });
+
+  socket.on('disconnect', () => {});
 });
 
 app.get('/', (req: Request, res: Response) => {
