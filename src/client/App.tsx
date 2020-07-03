@@ -8,16 +8,18 @@ import { Room } from './pages/Room';
 export const App = () => {
   return (
     <Router>
-      <Layout style={{ height: '100vh', backgroundColor: 'white' }}>
+      <Layout style={{ height: '100%' }}>
         <NavBar />
-        <Switch>
-          <Route exact path="/">
-            <Landing />
-          </Route>
-          <Route exact path="/rooms/:roomId">
-            <Room />
-          </Route>
-        </Switch>
+        <Layout style={{ overflowY: 'auto', height: '100%', background: '#fff' }}>
+          <Switch>
+            <Route exact path="/">
+              <Landing />
+            </Route>
+            <Route exact path="/rooms/:roomId">
+              <Room />
+            </Route>
+          </Switch>
+        </Layout>
       </Layout>
     </Router>
   );
