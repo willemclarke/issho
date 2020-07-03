@@ -1,3 +1,8 @@
+import { Socket } from 'socket.io';
+
+export interface IsshoSocket extends Socket {
+  user: User;
+}
 export enum Messages {
   JOIN_ROOM = 'join-room',
   JOINED_ROOM = 'joined-room',
@@ -37,4 +42,5 @@ export interface VideoState {
   duration: number;
   playbackRate: number;
   loop: boolean;
+  lastAction: Date;
 }
