@@ -1,3 +1,8 @@
+import { Socket } from 'socket.io';
+
+export interface IsshoSocket extends Socket {
+  user: User;
+}
 export enum Messages {
   JOIN_ROOM = 'join-room',
   JOINED_ROOM = 'joined-room',
