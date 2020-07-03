@@ -1,8 +1,48 @@
 import React from 'react';
 import ReactPlayer from 'react-player';
 import { Socket } from 'socket.io';
-import { VideoState, RoomVideoState, Messages } from '../../../common/types';
+import { Messages, RoomVideoState, VideoState } from '../../../common/types';
 import { CommandBar } from './CommandBar';
+
+enum VideoPlayerAction {
+  SET_STATE,
+  PLAY_PAUSE,
+  PLAY,
+  PAUSE,
+}
+
+const videoPlayerReducer = (
+  initialState: VideoState,
+  action: { type: VideoPlayerAction; payload?: any },
+): VideoState => {
+  switch (action.type) {
+    case VideoPlayerAction.SET_STATE:
+      return {
+        ...initialState,
+        ...action.payload,
+      };
+    case VideoPlayerAction.PLAY:
+      return {
+        ...initialState,
+        playing: true,
+        lastAction: new Date(),
+      };
+    case VideoPlayerAction.PAUSE:
+      return {
+        ...initialState,
+        playing: false,
+        lastAction: new Date(),
+      };
+    case VideoPlayerAction.PLAY_PAUSE:
+      return {
+        ...initialState,
+        playing: !initialState.playing,
+        lastAction: new Date(),
+      };
+    default:
+      throw new Error(`No reducer to match action:  ${action}`);
+  }
+};
 
 interface Props {
   socket: Socket;
@@ -12,7 +52,7 @@ interface Props {
 export const VideoPlayer = (props: Props) => {
   const { socket, roomId } = props;
 
-  const [state, setState] = React.useState<VideoState>({
+  const [state, dispatch] = React.useReducer(videoPlayerReducer, {
     url: null,
     pip: false,
     playing: false,
@@ -25,50 +65,33 @@ export const VideoPlayer = (props: Props) => {
     duration: 0,
     playbackRate: 1.0,
     loop: false,
+    lastAction: new Date(),
   });
-
-  const [lastSyncedAt, setLastSyncedAt] = React.useState(new Date().valueOf());
 
   React.useEffect(() => {
     socket.on(Messages.SYNCED_ROOM_VIDEO_STATE, (data: RoomVideoState) => {
       console.log(data, 'recieved date on synced_room_video_state');
-      const { playing } = data;
-      setState({
-        ...state,
-        playing: playing,
-      });
+      dispatch({ type: VideoPlayerAction.SET_STATE, payload: data });
     });
   }, []);
 
   React.useEffect(() => {
-    syncVideoPlayerState();
-  }, [lastSyncedAt]);
-
-  const handlePlay = () => {
-    console.log('onPlay');
-    setState({ ...state, playing: true });
-  };
-
-  const handlePause = () => {
-    console.log('onPause');
-    setState({ ...state, playing: false });
-  };
-
-  const handlePlayAndPause = () => {
-    setState((prevState: VideoState) => {
-      return {
-        ...prevState,
-        playing: !prevState.playing,
-      };
-    });
-    setLastSyncedAt(new Date().valueOf());
-  };
-
-  const syncVideoPlayerState = () => {
     socket.emit(Messages.SEND_ROOM_VIDEO_STATE, {
       playing: state.playing,
       id: roomId,
     });
+  }, [state.lastAction]);
+
+  const handlePlay = () => {
+    dispatch({ type: VideoPlayerAction.PLAY });
+  };
+
+  const handlePause = () => {
+    dispatch({ type: VideoPlayerAction.PAUSE });
+  };
+
+  const handlePlayAndPause = () => {
+    dispatch({ type: VideoPlayerAction.PLAY_PAUSE });
   };
 
   return (

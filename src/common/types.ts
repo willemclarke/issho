@@ -42,4 +42,5 @@ export interface VideoState {
   duration: number;
   playbackRate: number;
   loop: boolean;
+  lastAction: Date;
 }
