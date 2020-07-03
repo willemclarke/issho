@@ -1,12 +1,14 @@
 import React from 'react';
 import _ from 'lodash';
 import { useParams } from 'react-router-dom';
-import { Socket } from 'socket.io';
-import { useQuery } from '../hooks/useQuery';
+import { useQuery } from 'react-query';
 import { Row, Col, Spin } from 'antd';
+import { Socket } from 'socket.io';
+import { useLocationQuery } from '../hooks/useQuery';
 import { RoomStatus, Messages } from '../../common/types';
 import { UserList } from '../components/room/UserList';
 import { VideoPlayer } from '../components/room/VideoPlayer';
+import { youtubeSearch } from '../api/api';
 
 interface Props {
   socket: Socket;
@@ -15,10 +17,13 @@ interface Props {
 export const Room = (props: Props) => {
   const { socket } = props;
   const { roomId } = useParams();
-  const username = useQuery().get('username');
+  const username = useLocationQuery().get('username');
 
   const [roomStatus, setRoomStatus] = React.useState<RoomStatus | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
+
+  const { isFetching, data, error } = useQuery('youtubeKey', () => {
+    return youtubeSearch('', 'searchTerm');
+  });
 
   React.useEffect(() => {
     socket.emit(Messages.JOINED_ROOM, {
