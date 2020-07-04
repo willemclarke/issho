@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Messages, RoomStatus } from '../../common/types';
-import { useQuery } from '../hooks/useQuery';
+import { useLocationQuery } from '../hooks/useQuery';
 import { Socket } from 'socket.io';
 import useSocket from 'use-socket.io-client';
 
@@ -13,7 +13,7 @@ export interface RoomContext {
 export const useRoom: () => RoomContext = () => {
   const [socket] = useSocket('ws://localhost:3000', { autoConnect: true });
   const { roomId } = useParams();
-  const username = useQuery().get('username');
+  const username = useLocationQuery().get('username');
 
   const [roomStatus, setRoomStatus] = React.useState<RoomStatus | null>(null);
 
