@@ -1,8 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import { useQuery } from 'react-query';
 import { Row, Col, Spin } from 'antd';
-import { youtubeSearch } from '../api/api';
 import { UserList } from '../components/room/UserList';
 import { VideoPlayer } from '../components/room/VideoPlayer';
 import { useRoom } from '../hooks/useRoom';
@@ -11,10 +9,6 @@ import { VideoSearch } from '../components/room/VideoSearch';
 interface Props {}
 
 export const Room = (props: Props) => {
-  const { isFetching, data, error } = useQuery('youtubeKey', () => {
-    return youtubeSearch('', 'searchTerm');
-  });
-
   const { roomStatus, socket } = useRoom();
 
   if (!roomStatus) {

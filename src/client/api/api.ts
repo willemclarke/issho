@@ -1,40 +1,40 @@
 import rp from 'request-promise';
 import _ from 'lodash';
 
-interface YoutubeResponse {
+export interface YoutubeResponse {
   kind: string;
   etag: string;
-  items: [
-    {
-      etag: string;
-      id: {
-        videoId: string;
+  items: YoutubeResponseItem[];
+}
+
+export interface YoutubeResponseItem {
+  etag: string;
+  id: {
+    videoId: string;
+  };
+  snippet: {
+    publishedAt: string;
+    channelId: string;
+    title: string;
+    description: string;
+    thumbnails: {
+      default: {
+        url: string;
+        width: number;
+        height: number;
       };
-      snippet: {
-        publishedAt: string;
-        channelId: string;
-        title: string;
-        description: string;
-        thumbnails: {
-          default: {
-            url: string;
-            width: number;
-            height: number;
-          };
-          medium: {
-            url: string;
-            width: number;
-            height: number;
-          };
-          high: {
-            url: string;
-            width: number;
-            height: number;
-          };
-        };
+      medium: {
+        url: string;
+        width: number;
+        height: number;
       };
-    },
-  ];
+      high: {
+        url: string;
+        width: number;
+        height: number;
+      };
+    };
+  };
 }
 
 // https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=25&q=${SEARCH_TERM}&key=${env.key}

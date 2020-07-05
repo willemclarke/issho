@@ -1,11 +1,13 @@
-import { config } from 'dotenv';
+import dotenv from 'dotenv';
 
-config();
+dotenv.config();
 
 export interface Config {
   youtubeToken: string;
 }
 
+// To do: need to fix (process.env[value]) returns undefined,
+// but accessing process.env.YOUTUBE_TOKEN, which is equivalent works
 export const getEnv = (value: string): string => {
   const env = process.env[value];
   if (!env) {
@@ -17,6 +19,6 @@ export const getEnv = (value: string): string => {
 
 export const fromEnv = (): Config => {
   return {
-    youtubeToken: getEnv('YOUTUBE_TOKEN'),
+    youtubeToken: process.env.YOUTUBE_TOKEN as string,
   };
 };
