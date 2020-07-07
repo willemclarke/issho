@@ -22,7 +22,7 @@ export const useRoom: () => RoomContext = () => {
       setRoomStatus(status);
     });
 
-    socket.emit(Messages.JOIN_ROOM, {
+    socket.emit(Messages.JOIN_ROOM_REQUEST, {
       roomId,
       username,
     });

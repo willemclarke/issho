@@ -14,13 +14,28 @@ const getRoomStatus = (roomId: string): RoomStatus => {
   const usersInRoom = _.filter(users, (user) => user.roomId === roomId);
 
   return {
-    id: roomId,
+    roomId,
     users: usersInRoom,
   };
 };
 
 io.on('connection', (socket: IsshoSocket) => {
-  socket.on(Messages.JOIN_ROOM, async (info) => {
+  socket.on(Messages.CAN_JOIN_ROOM_REQUEST, (info) => {
+    const { roomId, username } = info;
+
+    const roomStatus = getRoomStatus(roomId);
+
+    const existingUser = _.find(roomStatus.users, (user) => user.username === username);
+    if (existingUser) {
+      socket.emit(Messages.CAN_JOIN_ROOM_RESPONSE, {
+        error: `User ${username} already exists within the room: ${roomId}, please choose another username`,
+      });
+    } else {
+      socket.emit(Messages.CAN_JOIN_ROOM_RESPONSE, { error: null, username, roomId });
+    }
+  });
+
+  socket.on(Messages.JOIN_ROOM_REQUEST, async (info) => {
     const { roomId, username } = info;
     const roomStatus = getRoomStatus(roomId);
 

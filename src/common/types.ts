@@ -4,10 +4,10 @@ export interface IsshoSocket extends Socket {
   user: User;
 }
 export enum Messages {
-  JOIN_ROOM = 'join-room',
-  JOINED_ROOM = 'joined-room',
+  CAN_JOIN_ROOM_REQUEST = 'can-join-room-request',
+  CAN_JOIN_ROOM_RESPONSE = 'can-join-room-respone',
+  JOIN_ROOM_REQUEST = 'join-room',
   ROOM_STATUS = 'room-status',
-  VALIDATED_JOIN_ROOM = 'validated-join-room',
   INVALID_JOIN_ROOM = 'invalid-join-room',
   SEND_ROOM_VIDEO_STATE = 'send-room-video-state',
   SYNCED_ROOM_VIDEO_STATE = 'synced-room-video-state',
@@ -19,7 +19,7 @@ export interface User {
 }
 
 export interface RoomStatus {
-  id: string;
+  roomId: string;
   users: User[];
 }
 
