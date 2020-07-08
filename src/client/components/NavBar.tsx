@@ -4,10 +4,10 @@ import { Layout } from 'antd';
 
 export const NavBar = () => {
   return (
-    <Link to="/">
-      <Layout.Header style={{ backgroundColor: '#121212' }}>
+    <Layout.Header style={{ backgroundColor: '#121212' }}>
+      <Link to="/">
         <span style={{ color: 'white', fontSize: '2rem', fontWeight: 700 }}>issho</span>
-      </Layout.Header>
-    </Link>
+      </Link>
+    </Layout.Header>
   );
 };
