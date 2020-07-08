@@ -85,7 +85,7 @@ export const Room = () => {
   React.useEffect(() => {
     if (roomStatus) {
       socket.emit(Messages.SEND_ROOM_VIDEO_STATE, {
-        id: roomStatus.roomId, //was roomId
+        id: roomStatus.roomId,
         url: videoState.url,
         playing: videoState.playing,
       });

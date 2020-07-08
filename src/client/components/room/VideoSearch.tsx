@@ -1,22 +1,46 @@
 import React from 'react';
 import _ from 'lodash';
-import { Input, Row, Col, Divider, Spin, Result } from 'antd';
 import { useQuery } from 'react-query';
-import { youtubeSearch, YoutubeResponseItem } from '../../api/api';
-import { VideoSearchResult } from './VideoSearchResult';
 import { useAppContext } from '../../hooks/useAppContext';
+import { youtubeSearch, YoutubeResponseItem } from '../../api/api';
+import { Input, Row, Col, Divider, Spin, Result, List, Avatar } from 'antd';
 
-interface VideoSearchResultsProps {
+interface VideoSearchListProps {
   items: YoutubeResponseItem[];
   onVideoClick: (url: string) => void;
 }
 
-export const VideoSearchResults = (props: VideoSearchResultsProps) => {
+export const VideoSearchList = (props: VideoSearchListProps) => {
   const { items, onVideoClick } = props;
-  const results = _.map(items, (item) => (
-    <VideoSearchResult item={item} onVideoClick={onVideoClick} />
-  ));
-  return <div>{results}</div>;
+
+  const data = _.map(items, (item) => {
+    const videoUrl = () => onVideoClick(`https://www.youtube.com/watch?v=${item.id.videoId}`);
+
+    return {
+      thumbnail: item.snippet.thumbnails.medium.url,
+      title: item.snippet.title,
+      videoUrl,
+      description: item.snippet.description,
+    };
+  });
+
+  const list = (
+    <List
+      itemLayout="vertical"
+      dataSource={data}
+      renderItem={(item) => (
+        <List.Item onClick={item.videoUrl}>
+          <List.Item.Meta
+            avatar={<Avatar size={100} shape="square" src={item.thumbnail} />}
+            title={item.title}
+            description={item.description}
+          />
+        </List.Item>
+      )}
+    />
+  );
+
+  return <div>{list}</div>;
 };
 
 interface Props {
@@ -58,7 +82,7 @@ export const VideoSearch = (props: Props) => {
       <Divider />
       <Row>
         <Col span={24}>
-          <VideoSearchResults items={data?.items || []} onVideoClick={onVideoClick} />
+          <VideoSearchList items={data?.items || []} onVideoClick={onVideoClick} />
         </Col>
       </Row>
     </>
