@@ -6,7 +6,7 @@ export const NavBar = () => {
   return (
     <Layout.Header style={{ backgroundColor: '#121212' }}>
       <Link to="/">
-        <span style={{ color: 'white', fontSize: '2rem', fontWeight: 700 }}>issho-watch</span>
+        <span style={{ color: 'white', fontSize: '2rem', fontWeight: 700 }}>issho</span>
       </Link>
     </Layout.Header>
   );

@@ -17,6 +17,7 @@ export interface YoutubeResponseItem {
     channelId: string;
     title: string;
     description: string;
+    channelTitle: string;
     thumbnails: {
       default: {
         url: string;
