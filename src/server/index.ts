@@ -1,8 +1,11 @@
-import express, { Request, Response } from 'express';
-import socketio, { Socket } from 'socket.io';
+import express from 'express';
+import socketio from 'socket.io';
 import path from 'path';
-import { Messages, User, RoomStatus, IsshoSocket } from '../common/types';
+import { Messages, RoomStatus, IsshoSocket } from '../common/types';
+import dotenv from 'dotenv';
 import _ from 'lodash';
+
+dotenv.config();
 
 const app = express();
 const http = require('http').createServer(app);
@@ -76,6 +79,5 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 http.listen(port, () => {
-  console.log(__dirname, 'blah');
   console.log(`gurupu listening at http://localhost:${port}`);
 });
