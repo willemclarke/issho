@@ -10,6 +10,7 @@
     "server:run": "nodemon dist/server/index.js",
     "server:dev": "npm-run-all -p server:build server:run",
     "dev": "npm-run-all -p client:dev server:dev",
+    "build": "npm run client:build && npm run server:buildTwo",
     "start": "NODE_ENV=production node dist/server/index.js"
   },
   "license": "MIT",
