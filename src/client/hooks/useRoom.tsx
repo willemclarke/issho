@@ -11,7 +11,7 @@ export interface RoomContext {
 }
 
 export const useRoom: () => RoomContext = () => {
-  const [socket] = useSocket('ws://localhost:3000', { autoConnect: true });
+  const [socket] = useSocket(location.origin.replace(/^http/, 'ws'), { autoConnect: true });
   const { roomId } = useParams();
   const username = useLocationQuery().get('username');
 
