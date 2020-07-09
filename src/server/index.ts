@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import socketio, { Socket } from 'socket.io';
+import path from 'path';
 import { Messages, User, RoomStatus, IsshoSocket } from '../common/types';
 import _ from 'lodash';
 
@@ -70,10 +71,11 @@ io.on('connection', (socket: IsshoSocket) => {
   socket.on('disconnect', () => {});
 });
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World');
-});
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.resolve(__dirname, '../client')));
+}
 
 http.listen(port, () => {
+  console.log(__dirname, 'blah');
   console.log(`gurupu listening at http://localhost:${port}`);
 });

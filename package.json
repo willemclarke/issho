@@ -6,9 +6,11 @@
     "client:build": "parcel build src/client/index.html --out-dir dist/client",
     "client:dev": "parcel src/client/index.html --out-dir dist/client",
     "server:build": "parcel watch src/server/index.ts --out-dir dist/server --target=node",
+    "server:buildTwo": "parcel build src/server/index.ts --out-dir dist/server --target=node",
     "server:run": "nodemon dist/server/index.js",
     "server:dev": "npm-run-all -p server:build server:run",
-    "dev": "npm-run-all -p client:dev server:dev"
+    "dev": "npm-run-all -p client:dev server:dev",
+    "start": "node dist/server/index.js"
   },
   "license": "MIT",
   "dependencies": {
