@@ -1,0 +1,1 @@
+web: npm run client:build && npm run server:buildTwo && npm run start
