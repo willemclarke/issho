@@ -14,7 +14,7 @@ export const UserList = (props: Props) => {
 
   const userList = _.map(users, (user, index) => {
     return (
-      <Title level={3} key={index}>
+      <Title level={3} key={user.username}>
         <Text mark>{user.username}</Text>
       </Title>
     );
