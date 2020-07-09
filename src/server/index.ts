@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 const http = require('http').createServer(app);
 const io = socketio(http);
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const getRoomStatus = (roomId: string): RoomStatus => {
   const sockets = io.sockets.sockets as { [id: string]: IsshoSocket };
