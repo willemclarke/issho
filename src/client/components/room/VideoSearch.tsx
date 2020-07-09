@@ -14,12 +14,10 @@ export const VideoSearchList = (props: VideoSearchListProps) => {
   const { items, onVideoClick } = props;
 
   const data = _.map(items, (item) => {
-    const videoUrl = () => onVideoClick(`https://www.youtube.com/watch?v=${item.id.videoId}`);
-
     return {
       thumbnail: item.snippet.thumbnails.medium.url,
       title: item.snippet.title,
-      videoUrl,
+      videoUrl: () => onVideoClick(`https://www.youtube.com/watch?v=${item.id.videoId}`),
       description: item.snippet.description,
     };
   });
