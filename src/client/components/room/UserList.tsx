@@ -12,9 +12,9 @@ interface Props {
 export const UserList = (props: Props) => {
   const { users } = props;
 
-  const userList = _.map(users, (user) => {
+  const userList = _.map(users, (user, index) => {
     return (
-      <Title level={3}>
+      <Title level={3} key={user.username}>
         <Text mark>{user.username}</Text>
       </Title>
     );

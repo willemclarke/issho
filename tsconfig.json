@@ -5,6 +5,7 @@
     "paths": {
       "~*": ["./*"]
     },
+    "typeRoots": ["./src/common/types", "./node_modules/@types"],
     "outDir": "dist/server",
     "strict": true,
     "target": "ES2016",

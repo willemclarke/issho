@@ -19,7 +19,7 @@
     "parcel-bundler": "^1.12.4",
     "react": "^16.8.0",
     "react-dom": "^16.13.1",
-    "react-player": "^2.4.0",
+    "react-player": "^2.5.0",
     "react-query": "^2.4.13",
     "react-router-dom": "^5.2.0",
     "request-promise": "^4.2.5",
