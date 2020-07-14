@@ -5,12 +5,11 @@ export interface IsshoSocket extends Socket {
 }
 export enum Messages {
   CAN_JOIN_ROOM_REQUEST = 'can-join-room-request',
-  CAN_JOIN_ROOM_RESPONSE = 'can-join-room-respone',
-  JOIN_ROOM_REQUEST = 'join-room',
-  ROOM_STATUS = 'room-status',
-  INVALID_JOIN_ROOM = 'invalid-join-room',
-  SEND_ROOM_VIDEO_STATE = 'send-room-video-state',
-  SYNCED_ROOM_VIDEO_STATE = 'synced-room-video-state',
+  CAN_JOIN_ROOM_RESPONSE = 'can-join-room-response',
+  JOIN_ROOM_REQUEST = 'join-room-request',
+  ROOM_STATUS_RESPONSE = 'room-status-response',
+  INVALID_JOIN_ROOM_RESPONSE = 'invalid-join-room-response',
+  ROOM_VIDEO_STATE_REQUEST = 'room-video-state-request',
 }
 
 export interface User {
@@ -18,29 +17,22 @@ export interface User {
   username: string;
 }
 
+// Type we share across the room.
+export interface RoomVideoPlayerState {
+  playing: boolean;
+  url: string;
+}
+
+export interface RoomPlaylistEntry {
+  url: string;
+  name: string;
+  thumbnailUrl: string;
+  addedByUsername: string;
+}
+
 export interface RoomStatus {
   roomId: string;
   users: User[];
-}
-
-// Type we share across the room.
-export interface RoomVideoState {
-  id: string;
-  playing: boolean;
-}
-
-export interface VideoState {
-  url: null | string;
-  pip: boolean;
-  playing: boolean;
-  controls: boolean;
-  light: boolean;
-  volume: number;
-  muted: boolean;
-  played: number;
-  loaded: number;
-  duration: number;
-  playbackRate: number;
-  loop: boolean;
-  lastAction: Date;
+  videoPlayerState: RoomVideoPlayerState;
+  playlist: RoomPlaylistEntry[];
 }
