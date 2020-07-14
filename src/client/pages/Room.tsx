@@ -1,19 +1,34 @@
+import { Col, Row, Spin } from 'antd';
 import React from 'react';
-import _ from 'lodash';
-import { Row, Col, Spin } from 'antd';
+import { Messages } from '../../common/types';
 import { UserList } from '../components/room/UserList';
 import { VideoPlayer } from '../components/room/VideoPlayer';
-import { useRoom } from '../hooks/useRoom';
 import { VideoSearch } from '../components/room/VideoSearch';
-import { VideoState, RoomVideoState, Messages } from '../../common/types';
+import { useRoom } from '../hooks/useRoom';
 
 enum VideoPlayerAction {
-  CHANGE_VIDEO_URL,
   SET_STATE,
+  CHANGE_VIDEO_URL,
   PLAY_PAUSE,
   PLAY,
   PAUSE,
   SEEK,
+}
+
+interface VideoState {
+  url: null | string;
+  pip: boolean;
+  playing: boolean;
+  controls: boolean;
+  light: boolean;
+  volume: number;
+  muted: boolean;
+  played: number;
+  loaded: number;
+  duration: number;
+  playbackRate: number;
+  loop: boolean;
+  lastAction: Date;
 }
 
 const videoPlayerReducer = (
@@ -76,18 +91,25 @@ export const Room = () => {
   });
 
   React.useEffect(() => {
-    socket.on(Messages.SYNCED_ROOM_VIDEO_STATE, (data: RoomVideoState) => {
-      console.log(data, 'recieved date on synced_room_video_state');
-      dispatch({ type: VideoPlayerAction.SET_STATE, payload: data });
+    if (roomStatus?.videoPlayerState) {
+      dispatch({ type: VideoPlayerAction.SET_STATE, payload: roomStatus?.videoPlayerState });
+    }
+  }, [roomStatus]);
+
+  React.useEffect(() => {
+    socket.on(Messages.INVALID_JOIN_ROOM_RESPONSE, (data) => {
+      console.log(data, 'received error');
     });
   }, []);
 
   React.useEffect(() => {
     if (roomStatus) {
-      socket.emit(Messages.SEND_ROOM_VIDEO_STATE, {
-        id: roomStatus.roomId,
-        url: videoState.url,
-        playing: videoState.playing,
+      socket.emit(Messages.ROOM_VIDEO_STATE_REQUEST, {
+        roomId: roomStatus.roomId,
+        roomVideoPlayerState: {
+          playing: videoState.playing,
+          url: videoState.url,
+        },
       });
     }
   }, [videoState.lastAction]);
