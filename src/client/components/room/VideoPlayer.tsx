@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactPlayer from 'react-player';
-import { VideoState } from '../../../common/types';
+import { VideoState } from '../../pages/Room';
 
 interface Props {
   videoState: VideoState;

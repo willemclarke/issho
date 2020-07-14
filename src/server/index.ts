@@ -2,9 +2,9 @@ import dotenv from 'dotenv';
 import express from 'express';
 import path from 'path';
 import socketio from 'socket.io';
+import _ from 'lodash';
 import { IsshoSocket, Messages } from '../common/types';
 import { RoomManager, RoomManagerError } from './roomManager';
-import _ from 'lodash';
 
 dotenv.config();
 
@@ -40,6 +40,7 @@ io.on('connection', (socket: IsshoSocket) => {
         socket.join(roomId);
         // Send room status back to ALL clients
         io.in(roomId).emit(Messages.ROOM_STATUS_RESPONSE, roomManager.getRoomStatus(roomId));
+        break;
       }
       case RoomManagerError.JOIN_ROOM_DUPLICATE_USER: {
         //TODO: Match on this error

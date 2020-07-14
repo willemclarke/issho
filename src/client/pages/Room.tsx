@@ -1,10 +1,12 @@
-import { Col, Row, Spin } from 'antd';
 import React from 'react';
+import { Col, Row, Spin, Result, Button } from 'antd';
+import { FrownOutlined } from '@ant-design/icons';
 import { Messages } from '../../common/types';
 import { UserList } from '../components/room/UserList';
 import { VideoPlayer } from '../components/room/VideoPlayer';
 import { VideoSearch } from '../components/room/VideoSearch';
 import { useRoom } from '../hooks/useRoom';
+import { Link } from 'react-router-dom';
 
 enum VideoPlayerAction {
   SET_STATE,
@@ -15,7 +17,7 @@ enum VideoPlayerAction {
   SEEK,
 }
 
-interface VideoState {
+export interface VideoState {
   url: null | string;
   pip: boolean;
   playing: boolean;
@@ -74,6 +76,7 @@ const videoPlayerReducer = (
 export const Room = () => {
   const { roomStatus, socket } = useRoom();
 
+  const [error, setError] = React.useState<string | null>(null);
   const [videoState, dispatch] = React.useReducer(videoPlayerReducer, {
     url: 'https://www.youtube.com/watch?v=TSN5r_UfIXQ',
     pip: false,
@@ -97,8 +100,8 @@ export const Room = () => {
   }, [roomStatus]);
 
   React.useEffect(() => {
-    socket.on(Messages.INVALID_JOIN_ROOM_RESPONSE, (data) => {
-      console.log(data, 'received error');
+    socket.on(Messages.INVALID_JOIN_ROOM_RESPONSE, (data: { errorMessage: string }) => {
+      setError(data.errorMessage);
     });
   }, []);
 
@@ -129,6 +132,21 @@ export const Room = () => {
   const handleVideoClick = (url: string) => {
     dispatch({ type: VideoPlayerAction.CHANGE_VIDEO_URL, payload: { url } });
   };
+
+  if (error) {
+    return (
+      <Result
+        icon={<FrownOutlined style={{ color: '#121212' }} />}
+        title="409"
+        subTitle={error}
+        extra={
+          <Link to="/">
+            <Button type="primary">Back Home</Button>
+          </Link>
+        }
+      />
+    );
+  }
 
   if (!roomStatus) {
     return <Spin />;
