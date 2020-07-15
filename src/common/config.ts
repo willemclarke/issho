@@ -4,6 +4,7 @@ dotenv.config();
 
 export interface Config {
   youtubeToken: string;
+  webSocketApi: string;
 }
 
 // To do: need to fix (process.env[value]) returns undefined,
@@ -20,5 +21,6 @@ export const getEnv = (value: string): string => {
 export const fromEnv = (): Config => {
   return {
     youtubeToken: process.env.YOUTUBE_TOKEN as string,
+    webSocketApi: process.env.WEB_SOCKET_API as string,
   };
 };

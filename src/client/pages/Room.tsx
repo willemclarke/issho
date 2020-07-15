@@ -1,19 +1,36 @@
 import React from 'react';
-import _ from 'lodash';
-import { Row, Col, Spin } from 'antd';
+import { Col, Row, Spin, Result, Button } from 'antd';
+import { FrownOutlined } from '@ant-design/icons';
+import { Messages } from '../../common/types';
 import { UserList } from '../components/room/UserList';
 import { VideoPlayer } from '../components/room/VideoPlayer';
-import { useRoom } from '../hooks/useRoom';
 import { VideoSearch } from '../components/room/VideoSearch';
-import { VideoState, RoomVideoState, Messages } from '../../common/types';
+import { useRoom } from '../hooks/useRoom';
+import { Link } from 'react-router-dom';
 
 enum VideoPlayerAction {
-  CHANGE_VIDEO_URL,
   SET_STATE,
+  CHANGE_VIDEO_URL,
   PLAY_PAUSE,
   PLAY,
   PAUSE,
   SEEK,
+}
+
+export interface VideoState {
+  url: null | string;
+  pip: boolean;
+  playing: boolean;
+  controls: boolean;
+  light: boolean;
+  volume: number;
+  muted: boolean;
+  played: number;
+  loaded: number;
+  duration: number;
+  playbackRate: number;
+  loop: boolean;
+  lastAction: Date;
 }
 
 const videoPlayerReducer = (
@@ -59,6 +76,7 @@ const videoPlayerReducer = (
 export const Room = () => {
   const { roomStatus, socket } = useRoom();
 
+  const [error, setError] = React.useState<string | null>(null);
   const [videoState, dispatch] = React.useReducer(videoPlayerReducer, {
     url: 'https://www.youtube.com/watch?v=TSN5r_UfIXQ',
     pip: false,
@@ -76,18 +94,25 @@ export const Room = () => {
   });
 
   React.useEffect(() => {
-    socket.on(Messages.SYNCED_ROOM_VIDEO_STATE, (data: RoomVideoState) => {
-      console.log(data, 'recieved date on synced_room_video_state');
-      dispatch({ type: VideoPlayerAction.SET_STATE, payload: data });
+    if (roomStatus?.videoPlayerState) {
+      dispatch({ type: VideoPlayerAction.SET_STATE, payload: roomStatus?.videoPlayerState });
+    }
+  }, [roomStatus]);
+
+  React.useEffect(() => {
+    socket.on(Messages.INVALID_JOIN_ROOM_RESPONSE, (data: { errorMessage: string }) => {
+      setError(data.errorMessage);
     });
   }, []);
 
   React.useEffect(() => {
     if (roomStatus) {
-      socket.emit(Messages.SEND_ROOM_VIDEO_STATE, {
-        id: roomStatus.roomId,
-        url: videoState.url,
-        playing: videoState.playing,
+      socket.emit(Messages.ROOM_VIDEO_STATE_REQUEST, {
+        roomId: roomStatus.roomId,
+        roomVideoPlayerState: {
+          playing: videoState.playing,
+          url: videoState.url,
+        },
       });
     }
   }, [videoState.lastAction]);
@@ -107,6 +132,21 @@ export const Room = () => {
   const handleVideoClick = (url: string) => {
     dispatch({ type: VideoPlayerAction.CHANGE_VIDEO_URL, payload: { url } });
   };
+
+  if (error) {
+    return (
+      <Result
+        icon={<FrownOutlined style={{ color: '#121212' }} />}
+        title="409"
+        subTitle={error}
+        extra={
+          <Link to="/">
+            <Button type="primary">Back Home</Button>
+          </Link>
+        }
+      />
+    );
+  }
 
   if (!roomStatus) {
     return <Spin />;
