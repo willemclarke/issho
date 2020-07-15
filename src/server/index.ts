@@ -70,7 +70,7 @@ io.on('connection', (socket: IsshoSocket) => {
   });
 });
 
-app.get('/rooms/:roomId', (req, res) => {
+app.get('/rooms/:roomId/debug', (req, res) => {
   res.json(roomManager.getRoomStatus(req.params.roomId));
 });
 
