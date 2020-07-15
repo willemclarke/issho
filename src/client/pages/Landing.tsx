@@ -4,11 +4,13 @@ import useSocket from 'use-socket.io-client';
 import { useHistory } from 'react-router';
 import { Alert, Button, Col, Form, Input, Row, Typography } from 'antd';
 import { Messages } from '../../common/types';
+import { useAppContext  } from "../hooks/useAppContext"
 
 const { Title } = Typography;
 
 export const Landing = () => {
-  const [socket] = useSocket(location.origin.replace(/^http/, 'ws'), { autoConnect: true });
+  const { config } = useAppContext()
+  const [socket] = useSocket(config.webSocketApi, { autoConnect: true });
   const history = useHistory();
 
   const [username, setUsername] = React.useState('');

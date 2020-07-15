@@ -7,6 +7,7 @@ import { fromEnv } from '../common/config';
 import { ConfigContextProvider } from './context/ConfigContext';
 
 const config = fromEnv();
+
 const Root = () => {
   return (
     <ConfigContextProvider config={config}>
