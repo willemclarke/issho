@@ -6,12 +6,11 @@ import { useAppContext } from '../../hooks/useAppContext';
 import { VideoSearchList } from './VideoSearchList';
 
 interface Props {
-  onVideoClick: (url: string) => void;
-  onPlaylistAdd: (url: string, description: string, title: string, thumbnailUrl: string) => void;
+  onPlaylistAdd: (url: string, title: string, channelTitle: string, thumbnailUrl: string) => void;
 }
 
 export const VideoSearch = (props: Props) => {
-  const { onVideoClick, onPlaylistAdd } = props;
+  const { onPlaylistAdd } = props;
 
   const { config } = useAppContext();
   const [searchValue, setSearchValue] = React.useState<string>('');
@@ -44,11 +43,7 @@ export const VideoSearch = (props: Props) => {
       <Row>
         <Col span={24}>
           {searchingVideoSpin}
-          <VideoSearchList
-            items={data?.items || []}
-            onVideoClick={onVideoClick}
-            onPlaylistAdd={onPlaylistAdd}
-          />
+          <VideoSearchList items={data?.items || []} onPlaylistAdd={onPlaylistAdd} />
         </Col>
       </Row>
     </>

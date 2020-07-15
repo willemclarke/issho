@@ -21,6 +21,7 @@ export const useRoom: () => RoomContext = () => {
 
   React.useEffect(() => {
     socket.on(Messages.ROOM_STATUS_RESPONSE, (status: RoomStatus) => {
+      console.log('status', status);
       setRoomStatus(status);
     });
 

@@ -1,39 +1,59 @@
 import React from 'react';
-import { RoomPlaylistEntry } from '../../../common/types';
+import { RoomPlaylistEntry, RoomStatus } from '../../../common/types';
 import _ from 'lodash';
 import { List, Avatar, Space } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, CaretRightOutlined } from '@ant-design/icons';
 
 interface Props {
-  playlist: RoomPlaylistEntry[];
+  roomStatus: RoomStatus;
   onDelete: (id: string) => void;
+  onClick: (id: string) => void;
 }
 
 export const VideoPlaylist = (props: Props) => {
-  const { playlist, onDelete } = props;
+  const { roomStatus, onDelete, onClick } = props;
+  const { playlist } = roomStatus;
+  const currentPlayingNumber =
+    _.findIndex(playlist, (entry) => entry.id === roomStatus.videoPlayerState.currentPlaylistId) +
+    1;
 
   const list = (
     <List
       dataSource={playlist}
-      renderItem={(item) => (
-        <List.Item
-          actions={[
-            <Space>
-              <span onClick={() => onDelete(item.id)}>
-                <DeleteOutlined />
-                Delete
-              </span>
-            </Space>,
-          ]}
-        >
-          <List.Item.Meta
-            avatar={<Avatar size={100} shape="square" src={item.thumbnailUrl} />}
-            title={item.title}
-            description={item.description}
-          />
-        </List.Item>
-      )}
+      itemLayout="vertical"
+      bordered
+      renderItem={(item, index) => {
+        return (
+          <List.Item
+            style={{ backgroundColor: index + 1 === currentPlayingNumber ? '#f0f0f0' : 'white' }}
+            actions={[
+              <Space>
+                <span>{index + 1}</span>
+                <span onClick={() => onDelete(item.id)}>
+                  <DeleteOutlined />
+                  Delete
+                </span>
+                <span onClick={() => onClick(item.id)}>
+                  <CaretRightOutlined />
+                  Play now
+                </span>
+              </Space>,
+            ]}
+          >
+            <List.Item.Meta
+              avatar={<img src={item.thumbnailUrl} style={{ width: '120px' }} />}
+              title={item.title}
+              description={item.channelTitle}
+            />
+          </List.Item>
+        );
+      }}
     />
   );
-  return <div>{list}</div>;
+  return (
+    <div>
+      {currentPlayingNumber}/{playlist.length}
+      {list}
+    </div>
+  );
 };

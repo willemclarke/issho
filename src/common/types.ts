@@ -24,14 +24,15 @@ export interface User {
 // Types we share across the room.
 export interface RoomVideoPlayerState {
   playing: boolean;
-  url: string;
+  currentPlaylistId?: string;
+  ended: boolean;
 }
 
 export interface RoomPlaylistEntry {
   id: string;
   url: string;
-  description: string;
   title: string;
+  channelTitle: string;
   thumbnailUrl: string;
   addedByUsername: string;
 }

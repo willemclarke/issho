@@ -84,12 +84,13 @@ io.on('connection', (socket: IsshoSocket) => {
   });
 
   socket.on(Messages.ROOM_VIDEO_STATE_REQUEST, (msg) => {
-    roomManager.setVideoState(msg.roomId, msg.roomVideoPlayerState);
-    sendToAllExcludingClient({
-      socket,
+    roomManager.handleVideoState(msg.roomId, msg.roomVideoPlayerState);
+    const roomStatus = roomManager.getRoomStatus(msg.roomId);
+
+    sendToAllInRoom({
       roomId: msg.roomId,
       type: Messages.ROOM_STATUS_RESPONSE,
-      payload: roomManager.getRoomStatus(msg.roomId),
+      payload: roomStatus,
     });
   });
 
@@ -104,11 +105,11 @@ io.on('connection', (socket: IsshoSocket) => {
 
   socket.on(Messages.PLAYLIST_ADD_REQUEST, (msg) => {
     roomManager.addToPlaylist(msg.roomId, {
-      addedByUsername: socket.user.username,
+      addedByUsername: 'FIXME',
       url: msg.url,
       thumbnailUrl: msg.thumbnailUrl,
-      description: msg.description,
       title: msg.title,
+      channelTitle: msg.channelTitle,
     });
     sendToAllInRoom({
       roomId: msg.roomId,

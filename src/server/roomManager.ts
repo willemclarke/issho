@@ -53,7 +53,8 @@ export class RoomManager {
         ],
         videoPlayerState: {
           playing: false,
-          url: 'https://www.youtube.com/watch?v=TSN5r_UfIXQ',
+          ended: false,
+          currentPlaylistId: undefined,
         },
         playlist: [],
       };
@@ -92,11 +93,23 @@ export class RoomManager {
     return _.get(this.store, roomId, undefined);
   }
 
-  setVideoState(roomId: string, videoPlayerState: RoomVideoPlayerState): void {
+  handleVideoState(roomId: string, videoPlayerState: RoomVideoPlayerState): void {
     const roomStatus = this.getRoomStatus(roomId);
 
     if (!roomStatus) {
       return;
+    }
+
+    if (videoPlayerState.ended) {
+      const currentIndex = _.findIndex(
+        roomStatus.playlist,
+        (entry) => entry.id === roomStatus.videoPlayerState.currentPlaylistId,
+      );
+
+      const nextPlaylistId = roomStatus.playlist[currentIndex + 1]?.id;
+      videoPlayerState.currentPlaylistId = nextPlaylistId;
+      videoPlayerState.playing = true;
+      videoPlayerState.ended = false;
     }
 
     this.store[roomId].videoPlayerState = videoPlayerState;
@@ -107,8 +120,8 @@ export class RoomManager {
     options: {
       addedByUsername: string;
       url: string;
-      description: string;
       title: string;
+      channelTitle: string;
       thumbnailUrl: string;
     },
   ): void {
@@ -119,18 +132,33 @@ export class RoomManager {
     const playlistWithEntryAdded = _.concat(roomStatus.playlist, {
       id: randomString(8),
       url: options.url,
-      description: options.description,
       title: options.title,
+      channelTitle: options.channelTitle,
       thumbnailUrl: options.thumbnailUrl,
       addedByUsername: options.addedByUsername,
     });
     this.store[roomId].playlist = playlistWithEntryAdded;
+
+    // If first video added into the playlist -> immediately play
+    if (playlistWithEntryAdded.length === 1) {
+      this.store[roomId].videoPlayerState.currentPlaylistId = _.head(playlistWithEntryAdded)?.id;
+      this.store[roomId].videoPlayerState.playing = true;
+    }
   }
 
   deleteFromPlaylist(roomId: string, id: string): void {
     const roomStatus = this.getRoomStatus(roomId);
     if (!roomStatus) {
       return;
+    }
+
+    // If the entry we are deleting is the one we are currently playing:
+    // Start playing the next item in the playlist
+
+    if (roomStatus.videoPlayerState.currentPlaylistId === id) {
+      const currentPlaylistIdIndex = _.findIndex(roomStatus.playlist, (entry) => entry.id === id);
+      const nextPlaylistId = roomStatus.playlist[currentPlaylistIdIndex + 1]?.id;
+      this.store[roomId].videoPlayerState.currentPlaylistId = nextPlaylistId;
     }
 
     const playlistWithEntryRemoved = _.reject(roomStatus.playlist, (entry) => entry.id === id);

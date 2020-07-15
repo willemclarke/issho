@@ -1,4 +1,5 @@
 import React from 'react';
+import logger from 'use-reducer-logger';
 import { Col, Row, Spin, Result, Button, Tabs, Input, Divider } from 'antd';
 import { FrownOutlined } from '@ant-design/icons';
 import { Messages, RoomPlaylistEntry } from '../../common/types';
@@ -10,16 +11,17 @@ import { Link } from 'react-router-dom';
 import { VideoPlaylist } from '../components/room/VideoPlaylist';
 
 enum VideoPlayerAction {
-  SET_STATE,
-  CHANGE_VIDEO_URL,
-  PLAY_PAUSE,
-  PLAY,
-  PAUSE,
-  SEEK,
+  SET_STATE = 'SET_STATE',
+  CHANGE_CURRENT_PLAYLIST_ID = 'CHANGE_CURRENT_PLAYLIST_ID',
+  PLAY_PAUSE = 'PLAY_PAUSE',
+  PLAY = 'PLAY',
+  PAUSE = 'PAUSE',
+  SEEK = 'SEEK',
+  ENDED = 'ENDED',
 }
 
 export interface VideoState {
-  url: null | string;
+  currentPlaylistId?: string;
   pip: boolean;
   playing: boolean;
   controls: boolean;
@@ -31,6 +33,7 @@ export interface VideoState {
   duration: number;
   playbackRate: number;
   loop: boolean;
+  ended: boolean;
   lastAction: Date;
 }
 
@@ -62,13 +65,21 @@ const videoPlayerReducer = (
         playing: !initialState.playing,
         lastAction: new Date(),
       };
-    case VideoPlayerAction.CHANGE_VIDEO_URL:
+    case VideoPlayerAction.ENDED:
+      return {
+        ...initialState,
+        playing: false,
+        ended: true,
+        lastAction: new Date(),
+      };
+    case VideoPlayerAction.CHANGE_CURRENT_PLAYLIST_ID:
       return {
         ...initialState,
         playing: true,
-        url: action.payload.url,
+        currentPlaylistId: action.payload.id,
         lastAction: new Date(),
       };
+
     default:
       throw new Error(`No reducer to match action:  ${action}`);
   }
@@ -78,8 +89,8 @@ export const Room = () => {
   const { roomStatus, socket } = useRoom();
 
   const [error, setError] = React.useState<string | null>(null);
-  const [videoState, dispatchVideoAction] = React.useReducer(videoPlayerReducer, {
-    url: 'https://www.youtube.com/watch?v=TSN5r_UfIXQ',
+  const [videoState, dispatchVideoAction] = React.useReducer(logger(videoPlayerReducer), {
+    currentPlaylistId: undefined,
     pip: false,
     playing: false,
     controls: true,
@@ -91,6 +102,7 @@ export const Room = () => {
     duration: 0,
     playbackRate: 1.0,
     loop: false,
+    ended: false,
     lastAction: new Date(),
   });
 
@@ -115,7 +127,8 @@ export const Room = () => {
         roomId: roomStatus.roomId,
         roomVideoPlayerState: {
           playing: videoState.playing,
-          url: videoState.url,
+          ended: videoState.ended,
+          currentPlaylistId: videoState.currentPlaylistId,
         },
       });
     }
@@ -152,8 +165,12 @@ export const Room = () => {
     dispatchVideoAction({ type: VideoPlayerAction.PLAY_PAUSE });
   };
 
-  const handleVideoClick = (url: string) => {
-    dispatchVideoAction({ type: VideoPlayerAction.CHANGE_VIDEO_URL, payload: { url } });
+  const handleEnded = () => {
+    dispatchVideoAction({ type: VideoPlayerAction.ENDED });
+  };
+
+  const handlePlaylistVideoClick = (id: string) => {
+    dispatchVideoAction({ type: VideoPlayerAction.CHANGE_CURRENT_PLAYLIST_ID, payload: { id } });
   };
 
   const handlePlaylistDelete = (id: string) => {
@@ -165,38 +182,45 @@ export const Room = () => {
 
   const handlePlaylistAdd = (
     url: string,
-    description: string,
     title: string,
+    channelTitle: string,
     thumbnailUrl: string,
   ) => {
     socket.emit(Messages.PLAYLIST_ADD_REQUEST, {
       roomId: roomStatus.roomId,
       url,
-      description,
       title,
+      channelTitle,
       thumbnailUrl,
     });
   };
 
-  console.log(roomStatus, 'roomstatus');
   return (
     <Row style={{ height: '100%' }}>
       <Col span={18} style={{ height: '100%', padding: '16px' }}>
         <VideoPlayer
+          playlist={roomStatus.playlist}
           videoState={videoState}
           handlePlay={handlePlay}
           handlePause={handlePause}
           handlePlayAndPause={handlePlayAndPause}
+          handleEnded={handleEnded}
         />
         <UserList users={roomStatus.users} />
+        <Divider />
+        <pre>{JSON.stringify(roomStatus, null, 2)}</pre>
       </Col>
       <Col span={6} style={{ height: '100%', padding: '16px', overflowY: 'auto' }}>
         <Tabs defaultActiveKey="search">
           <Tabs.TabPane tab="Search youtube" key="search">
-            <VideoSearch onVideoClick={handleVideoClick} onPlaylistAdd={handlePlaylistAdd} />
+            <VideoSearch onPlaylistAdd={handlePlaylistAdd} />
           </Tabs.TabPane>
           <Tabs.TabPane tab="Playlist" key="playlist">
-            <VideoPlaylist playlist={roomStatus.playlist} onDelete={handlePlaylistDelete} />
+            <VideoPlaylist
+              roomStatus={roomStatus}
+              onDelete={handlePlaylistDelete}
+              onClick={handlePlaylistVideoClick}
+            />
           </Tabs.TabPane>
         </Tabs>
       </Col>
