@@ -1,5 +1,6 @@
-import { RoomStatus, RoomVideoPlayerState } from '../common/types';
 import _ from 'lodash';
+import { RoomStatus, RoomVideoPlayerState } from '../common/types';
+import { randomString } from '../common/utils';
 
 interface RoomStore {
   [roomId: string]: RoomStatus;
@@ -54,6 +55,7 @@ export class RoomManager {
           playing: false,
           url: 'https://www.youtube.com/watch?v=TSN5r_UfIXQ',
         },
+        playlist: [],
       };
     } else {
       this.store[roomId] = {
@@ -100,7 +102,38 @@ export class RoomManager {
     this.store[roomId].videoPlayerState = videoPlayerState;
   }
 
-  addToPlaylist(roomId: string, username: string, url: string): void {}
+  addToPlaylist(
+    roomId: string,
+    options: {
+      addedByUsername: string;
+      url: string;
+      description: string;
+      title: string;
+      thumbnailUrl: string;
+    },
+  ): void {
+    const roomStatus = this.getRoomStatus(roomId);
+    if (!roomStatus) {
+      return;
+    }
+    const playlistWithEntryAdded = _.concat(roomStatus.playlist, {
+      id: randomString(8),
+      url: options.url,
+      description: options.description,
+      title: options.title,
+      thumbnailUrl: options.thumbnailUrl,
+      addedByUsername: options.addedByUsername,
+    });
+    this.store[roomId].playlist = playlistWithEntryAdded;
+  }
 
-  removeFromPlaylist(roomId: string, username: string, url: string): void {}
+  deleteFromPlaylist(roomId: string, id: string): void {
+    const roomStatus = this.getRoomStatus(roomId);
+    if (!roomStatus) {
+      return;
+    }
+
+    const playlistWithEntryRemoved = _.reject(roomStatus.playlist, (entry) => entry.id === id);
+    this.store[roomId].playlist = playlistWithEntryRemoved;
+  }
 }

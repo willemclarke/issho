@@ -1,15 +1,14 @@
-import React from 'react';
-import { Socket } from 'socket.io';
-import useSocket from 'use-socket.io-client';
-import { useHistory } from 'react-router';
 import { Alert, Button, Col, Form, Input, Row, Typography } from 'antd';
+import React from 'react';
+import { useHistory } from 'react-router';
+import useSocket from 'use-socket.io-client';
 import { Messages } from '../../common/types';
-import { useAppContext  } from "../hooks/useAppContext"
+import { useAppContext } from '../hooks/useAppContext';
 
 const { Title } = Typography;
 
 export const Landing = () => {
-  const { config } = useAppContext()
+  const { config } = useAppContext();
   const [socket] = useSocket(config.webSocketApi, { autoConnect: true });
   const history = useHistory();
 

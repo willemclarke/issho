@@ -4,7 +4,7 @@ import { Messages, RoomStatus } from '../../common/types';
 import { useLocationQuery } from '../hooks/useQuery';
 import { Socket } from 'socket.io';
 import useSocket from 'use-socket.io-client';
-import { useAppContext  } from "./useAppContext"
+import { useAppContext } from './useAppContext';
 
 export interface RoomContext {
   roomStatus: RoomStatus | null;
@@ -12,7 +12,7 @@ export interface RoomContext {
 }
 
 export const useRoom: () => RoomContext = () => {
-  const { config } = useAppContext()
+  const { config } = useAppContext();
   const [socket] = useSocket(config.webSocketApi, { autoConnect: true });
   const { roomId } = useParams();
   const username = useLocationQuery().get('username');

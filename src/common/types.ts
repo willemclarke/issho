@@ -10,6 +10,10 @@ export enum Messages {
   ROOM_STATUS_RESPONSE = 'room-status-response',
   INVALID_JOIN_ROOM_RESPONSE = 'invalid-join-room-response',
   ROOM_VIDEO_STATE_REQUEST = 'room-video-state-request',
+
+  // Playlist requests
+  PLAYLIST_DELETE_REQUEST = 'playlist-delete-request',
+  PLAYLIST_ADD_REQUEST = 'playlist-add-request',
 }
 
 export interface User {
@@ -17,15 +21,17 @@ export interface User {
   username: string;
 }
 
-// Type we share across the room.
+// Types we share across the room.
 export interface RoomVideoPlayerState {
   playing: boolean;
   url: string;
 }
 
 export interface RoomPlaylistEntry {
+  id: string;
   url: string;
-  name: string;
+  description: string;
+  title: string;
   thumbnailUrl: string;
   addedByUsername: string;
 }

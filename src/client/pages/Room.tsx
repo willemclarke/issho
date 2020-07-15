@@ -1,12 +1,13 @@
 import React from 'react';
-import { Col, Row, Spin, Result, Button } from 'antd';
+import { Col, Row, Spin, Result, Button, Tabs, Input, Divider } from 'antd';
 import { FrownOutlined } from '@ant-design/icons';
-import { Messages } from '../../common/types';
+import { Messages, RoomPlaylistEntry } from '../../common/types';
 import { UserList } from '../components/room/UserList';
 import { VideoPlayer } from '../components/room/VideoPlayer';
 import { VideoSearch } from '../components/room/VideoSearch';
 import { useRoom } from '../hooks/useRoom';
 import { Link } from 'react-router-dom';
+import { VideoPlaylist } from '../components/room/VideoPlaylist';
 
 enum VideoPlayerAction {
   SET_STATE,
@@ -77,7 +78,7 @@ export const Room = () => {
   const { roomStatus, socket } = useRoom();
 
   const [error, setError] = React.useState<string | null>(null);
-  const [videoState, dispatch] = React.useReducer(videoPlayerReducer, {
+  const [videoState, dispatchVideoAction] = React.useReducer(videoPlayerReducer, {
     url: 'https://www.youtube.com/watch?v=TSN5r_UfIXQ',
     pip: false,
     playing: false,
@@ -95,13 +96,16 @@ export const Room = () => {
 
   React.useEffect(() => {
     if (roomStatus?.videoPlayerState) {
-      dispatch({ type: VideoPlayerAction.SET_STATE, payload: roomStatus?.videoPlayerState });
+      dispatchVideoAction({
+        type: VideoPlayerAction.SET_STATE,
+        payload: roomStatus?.videoPlayerState,
+      });
     }
   }, [roomStatus]);
 
   React.useEffect(() => {
-    socket.on(Messages.INVALID_JOIN_ROOM_RESPONSE, (data: { errorMessage: string }) => {
-      setError(data.errorMessage);
+    socket.on(Messages.INVALID_JOIN_ROOM_RESPONSE, (data: { error: string }) => {
+      setError(data.error);
     });
   }, []);
 
@@ -116,22 +120,6 @@ export const Room = () => {
       });
     }
   }, [videoState.lastAction]);
-
-  const handlePlay = () => {
-    dispatch({ type: VideoPlayerAction.PLAY });
-  };
-
-  const handlePause = () => {
-    dispatch({ type: VideoPlayerAction.PAUSE });
-  };
-
-  const handlePlayAndPause = () => {
-    dispatch({ type: VideoPlayerAction.PLAY_PAUSE });
-  };
-
-  const handleVideoClick = (url: string) => {
-    dispatch({ type: VideoPlayerAction.CHANGE_VIDEO_URL, payload: { url } });
-  };
 
   if (error) {
     return (
@@ -152,6 +140,45 @@ export const Room = () => {
     return <Spin />;
   }
 
+  const handlePlay = () => {
+    dispatchVideoAction({ type: VideoPlayerAction.PLAY });
+  };
+
+  const handlePause = () => {
+    dispatchVideoAction({ type: VideoPlayerAction.PAUSE });
+  };
+
+  const handlePlayAndPause = () => {
+    dispatchVideoAction({ type: VideoPlayerAction.PLAY_PAUSE });
+  };
+
+  const handleVideoClick = (url: string) => {
+    dispatchVideoAction({ type: VideoPlayerAction.CHANGE_VIDEO_URL, payload: { url } });
+  };
+
+  const handlePlaylistDelete = (id: string) => {
+    socket.emit(Messages.PLAYLIST_DELETE_REQUEST, {
+      roomId: roomStatus.roomId,
+      id: id,
+    });
+  };
+
+  const handlePlaylistAdd = (
+    url: string,
+    description: string,
+    title: string,
+    thumbnailUrl: string,
+  ) => {
+    socket.emit(Messages.PLAYLIST_ADD_REQUEST, {
+      roomId: roomStatus.roomId,
+      url,
+      description,
+      title,
+      thumbnailUrl,
+    });
+  };
+
+  console.log(roomStatus, 'roomstatus');
   return (
     <Row style={{ height: '100%' }}>
       <Col span={18} style={{ height: '100%', padding: '16px' }}>
@@ -164,7 +191,14 @@ export const Room = () => {
         <UserList users={roomStatus.users} />
       </Col>
       <Col span={6} style={{ height: '100%', padding: '16px', overflowY: 'auto' }}>
-        <VideoSearch onVideoClick={handleVideoClick} />
+        <Tabs defaultActiveKey="search">
+          <Tabs.TabPane tab="Search youtube" key="search">
+            <VideoSearch onVideoClick={handleVideoClick} onPlaylistAdd={handlePlaylistAdd} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Playlist" key="playlist">
+            <VideoPlaylist playlist={roomStatus.playlist} onDelete={handlePlaylistDelete} />
+          </Tabs.TabPane>
+        </Tabs>
       </Col>
     </Row>
   );
