@@ -9,7 +9,10 @@ const { Title } = Typography;
 
 export const Landing = () => {
   const { config } = useAppContext();
-  const [socket] = useSocket(config.webSocketApi, { autoConnect: true });
+  const [socket] = useSocket(config.webSocketApi, {
+    autoConnect: true,
+    secure: config.webSocketSecure,
+  });
   const history = useHistory();
 
   const [username, setUsername] = React.useState('');

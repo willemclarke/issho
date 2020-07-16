@@ -13,7 +13,10 @@ export interface RoomContext {
 
 export const useRoom: () => RoomContext = () => {
   const { config } = useAppContext();
-  const [socket] = useSocket(config.webSocketApi, { autoConnect: true });
+  const [socket] = useSocket(config.webSocketApi, {
+    autoConnect: true,
+    secure: config.webSocketSecure,
+  });
   const { roomId } = useParams();
   const username = useLocationQuery().get('username');
 
