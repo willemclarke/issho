@@ -104,8 +104,9 @@ io.on('connection', (socket: IsshoSocket) => {
   });
 
   socket.on(Messages.PLAYLIST_ADD_REQUEST, (msg) => {
+    console.log('socket users: ', socket.user);
     roomManager.addToPlaylist(msg.roomId, {
-      addedByUsername: 'FIXME',
+      addedByUsername: socket.user.username,
       url: msg.url,
       thumbnailUrl: msg.thumbnailUrl,
       title: msg.title,
