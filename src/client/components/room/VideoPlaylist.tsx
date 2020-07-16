@@ -29,6 +29,7 @@ export const VideoPlaylist = (props: Props) => {
             actions={[
               <Space>
                 <span>{index + 1}</span>
+                <span>Added by: {item.addedByUsername}</span>
                 <span onClick={() => onDelete(item.id)}>
                   <DeleteOutlined />
                   Delete
