@@ -1,8 +1,8 @@
 import React from 'react';
 import logger from 'use-reducer-logger';
-import { Col, Row, Spin, Result, Button, Tabs, Input, Divider } from 'antd';
+import { Col, Row, Spin, Result, Button, Tabs, Divider, Layout } from 'antd';
 import { FrownOutlined } from '@ant-design/icons';
-import { Messages, RoomPlaylistEntry } from '../../common/types';
+import { Messages } from '../../common/types';
 import { UserList } from '../components/room/UserList';
 import { VideoPlayer } from '../components/room/VideoPlayer';
 import { VideoSearch } from '../components/room/VideoSearch';
@@ -150,7 +150,11 @@ export const Room = () => {
   }
 
   if (!roomStatus) {
-    return <Spin />;
+    return (
+      <Layout style={{ height: '100vh' }}>
+        <Spin />
+      </Layout>
+    );
   }
 
   const handlePlay = () => {

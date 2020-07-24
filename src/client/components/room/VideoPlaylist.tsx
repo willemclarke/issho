@@ -1,8 +1,10 @@
 import React from 'react';
-import { RoomPlaylistEntry, RoomStatus } from '../../../common/types';
 import _ from 'lodash';
-import { List, Avatar, Space } from 'antd';
+import { RoomStatus } from '../../../common/types';
+import { List, Space, Typography, Divider } from 'antd';
 import { DeleteOutlined, CaretRightOutlined } from '@ant-design/icons';
+
+const { Title } = Typography;
 
 interface Props {
   roomStatus: RoomStatus;
@@ -13,6 +15,7 @@ interface Props {
 export const VideoPlaylist = (props: Props) => {
   const { roomStatus, onDelete, onClick } = props;
   const { playlist } = roomStatus;
+
   const currentPlayingNumber =
     _.findIndex(playlist, (entry) => entry.id === roomStatus.videoPlayerState.currentPlaylistId) +
     1;
@@ -23,13 +26,17 @@ export const VideoPlaylist = (props: Props) => {
       itemLayout="vertical"
       bordered
       renderItem={(item, index) => {
+        const videoNumber = index + 1;
+        const videoAddedBy = item.addedByUsername;
+
         return (
           <List.Item
             style={{ backgroundColor: index + 1 === currentPlayingNumber ? '#f0f0f0' : 'white' }}
             actions={[
               <Space>
-                <span>{index + 1}</span>
-                <span>Added by: {item.addedByUsername}</span>
+                <span>{videoNumber}</span>
+                <Divider type="vertical" style={{ margin: '0', backgroundColor: '#595959' }} />
+                <span>Added by: {videoAddedBy}</span>
                 <span onClick={() => onDelete(item.id)}>
                   <DeleteOutlined />
                   Delete
@@ -53,7 +60,10 @@ export const VideoPlaylist = (props: Props) => {
   );
   return (
     <div>
-      {currentPlayingNumber}/{playlist.length}
+      <Title
+        level={4}
+        style={{ color: '#595959' }}
+      >{`${roomStatus.roomId} - ${currentPlayingNumber}/${playlist.length}`}</Title>
       {list}
     </div>
   );

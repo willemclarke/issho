@@ -1,14 +1,14 @@
+import _ from 'lodash';
 import { useQuery } from 'react-query';
 import { youtubeSearch } from '../api/api';
 import { useAppContext } from './useAppContext';
 import { useInfiniteQuery } from 'react-query';
-import _ from 'lodash';
 
 export const useYoutubeSearch = (searchTerm: string) => {
   const { config } = useAppContext();
 
   const queryYoutube = async (...keysAndMore: any) => {
-    console.log(keysAndMore);
+    console.log('keys and more: ', keysAndMore);
     console.log('Search term', searchTerm);
     return youtubeSearch(config.youtubeToken, searchTerm);
   };
@@ -23,6 +23,7 @@ export const useYoutubeSearch = (searchTerm: string) => {
     canFetchMore,
   } = useInfiniteQuery('youtube', queryYoutube as any, {
     getFetchMore: ({ items, nextPageToken }) => {
+      console.log('items-getFetchMore', items);
       // if (items.length) {
       //   return nextPageToken;
       // }

@@ -1,8 +1,8 @@
 import React from 'react';
+import _ from 'lodash';
 import ReactPlayer from 'react-player';
 import { VideoState } from '../../pages/Room';
 import { RoomPlaylistEntry } from '~common/types';
-import _ from 'lodash';
 
 interface Props {
   videoState: VideoState;

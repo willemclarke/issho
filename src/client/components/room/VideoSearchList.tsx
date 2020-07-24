@@ -1,9 +1,9 @@
+import React from 'react';
+import _ from 'lodash';
+import ReactPlayer from 'react-player';
 import { PlusOutlined } from '@ant-design/icons';
 import { List, Space } from 'antd';
-import _ from 'lodash';
-import React from 'react';
 import { YoutubeResponseItem } from '../../api/api';
-import ReactPlayer from 'react-player';
 
 interface Props {
   items: YoutubeResponseItem[];
@@ -30,6 +30,7 @@ export const VideoSearchList = (props: Props) => {
     };
   });
 
+  // Only returning videos which pass the videoPLayers canPlay method to ensure correct video format is displayed onsite
   const playableData = _.filter(data, (item) => ReactPlayer.canPlay(item.url));
 
   const list = (

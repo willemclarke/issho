@@ -20,7 +20,7 @@
     "express": "^4.17.1",
     "lodash": "^4.17.15",
     "parcel-bundler": "^1.12.4",
-    "react": "^16.8.0",
+    "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-player": "^2.5.0",
     "react-query": "^2.4.19",

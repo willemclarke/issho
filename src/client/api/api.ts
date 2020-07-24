@@ -42,7 +42,7 @@ export interface YoutubeResponseItem {
 
 export async function youtubeSearch(token: string, query: string): Promise<YoutubeResponse> {
   const options = {
-    url: `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${query}&key=${token}`,
+    url: `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&q=${query}&key=${token}`,
     json: true,
   };
   const response = await rp(options);
