@@ -12,6 +12,15 @@ export const VideoSearch = ({ onPlaylistAdd }: Props) => {
   const [searchTerm, setSearchTerm] = React.useState<string>('');
   const { isFetching, data, error, fetchMore } = useYoutubeSearch(searchTerm);
 
+  React.useEffect(() => {
+    // TODO: Workaround to stop empty search on first render. Ideally we
+    // change this to ensure this effect does not run on the first render
+    // Example - https://stackoverflow.com/questions/53253940/make-react-useeffect-hook-not-run-on-initial-render
+    if (searchTerm) {
+      fetchMore();
+    }
+  }, [searchTerm]);
+
   if (error) {
     return <Result status="500" title="500" subTitle={error?.message} />;
   }
@@ -28,12 +37,7 @@ export const VideoSearch = ({ onPlaylistAdd }: Props) => {
     <>
       <Row>
         <Col span={24}>
-          <Input.Search
-            onSearch={(term) => {
-              setSearchTerm(term);
-              fetchMore();
-            }}
-          />
+          <Input.Search onSearch={(term) => setSearchTerm(term)} />
         </Col>
       </Row>
       <Divider />
