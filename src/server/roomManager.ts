@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { RoomStatus, RoomVideoPlayerState } from '../common/types';
+import { RoomStatus, RoomVideoPlayerState, RoomChatState } from '../common/types';
 import { randomString } from '../common/utils';
 
 interface RoomStore {
@@ -57,6 +57,7 @@ export class RoomManager {
           currentPlaylistId: undefined,
         },
         playlist: [],
+        chatState: [],
       };
     } else {
       this.store[roomId] = {
@@ -113,6 +114,18 @@ export class RoomManager {
     }
 
     this.store[roomId].videoPlayerState = videoPlayerState;
+  }
+
+  addChatMessage(roomId: string, username: string, message: string): void {
+    const roomStatus = this.getRoomStatus(roomId);
+
+    if (!roomStatus) {
+      return;
+    }
+
+    const chatStateWithAddedMessage = _.concat(roomStatus.chatState, { username, message });
+
+    this.store[roomId].chatState = chatStateWithAddedMessage;
   }
 
   addToPlaylist(

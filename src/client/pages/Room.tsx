@@ -1,6 +1,6 @@
 import React from 'react';
 import logger from 'use-reducer-logger';
-import { Col, Row, Spin, Result, Button, Tabs, Divider, Layout } from 'antd';
+import { Col, Row, Spin, Result, Button, Tabs, Divider, Layout, Space } from 'antd';
 import { FrownOutlined } from '@ant-design/icons';
 import { Messages } from '../../common/types';
 import { UserList } from '../components/room/UserList';
@@ -9,6 +9,7 @@ import { VideoSearch } from '../components/room/VideoSearch';
 import { useRoom } from '../hooks/useRoom';
 import { Link } from 'react-router-dom';
 import { VideoPlaylist } from '../components/room/VideoPlaylist';
+import { Chat } from '../components/room/Chat';
 
 enum VideoPlayerAction {
   SET_STATE = 'SET_STATE',
@@ -87,6 +88,7 @@ const videoPlayerReducer = (
 
 export const Room = () => {
   const { roomStatus, socket } = useRoom();
+  console.log('roomStatus: Room.tsx, ', roomStatus);
 
   const [error, setError] = React.useState<string | null>(null);
   const [videoState, dispatchVideoAction] = React.useReducer(logger(videoPlayerReducer), {
@@ -210,7 +212,10 @@ export const Room = () => {
           handlePlayAndPause={handlePlayAndPause}
           handleEnded={handleEnded}
         />
-        <UserList users={roomStatus.users} />
+        <Space>
+          <UserList users={roomStatus.users} />
+          <Chat roomStatus={roomStatus} socket={socket} />
+        </Space>
         <Divider />
         <pre>{JSON.stringify(roomStatus, null, 2)}</pre>
       </Col>

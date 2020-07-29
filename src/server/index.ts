@@ -94,6 +94,16 @@ io.on('connection', (socket: IsshoSocket) => {
     });
   });
 
+  socket.on(Messages.ADD_MESSAGE_REQUEST, (msg) => {
+    roomManager.addChatMessage(msg.roomId, msg.username, msg.message);
+
+    sendToAllInRoom({
+      roomId: msg.roomId,
+      type: Messages.ROOM_STATUS_RESPONSE,
+      payload: roomManager.getRoomStatus(msg.roomId),
+    });
+  });
+
   socket.on(Messages.PLAYLIST_DELETE_REQUEST, (msg) => {
     roomManager.deleteFromPlaylist(msg.roomId, msg.id);
     sendToAllInRoom({
