@@ -123,9 +123,29 @@ export class RoomManager {
       return;
     }
 
-    const chatStateWithAddedMessage = _.concat(roomStatus.chatState, { username, message });
+    const chatStateWithAddedMessage = _.concat(roomStatus.chatState, {
+      username,
+      message,
+      isTyping: false,
+    });
 
     this.store[roomId].chatState = chatStateWithAddedMessage;
+  }
+
+  addChatTyping(roomId: string, username: string, message: string): void {
+    const roomStatus = this.getRoomStatus(roomId);
+
+    if (!roomStatus) {
+      return;
+    }
+
+    const chatStateWithIsTyping = _.concat(roomStatus.chatState, {
+      username,
+      message,
+      isTyping: true,
+    });
+
+    this.store[roomId].chatState = chatStateWithIsTyping;
   }
 
   addToPlaylist(

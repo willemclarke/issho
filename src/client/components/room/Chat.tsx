@@ -12,26 +12,56 @@ interface Props {
 
 export const Chat = (props: Props) => {
   const { roomStatus, socket } = props;
-  console.log('roomStatus, chat.tsx ', roomStatus);
+  console.log('chat.tsx roomStatus: ', roomStatus);
 
   const username = useLocationQuery().get('username');
-  const [message, setMessage] = React.useState<string>('');
+  const [message, setMessage] = React.useState<{ message: string; isTyping: boolean }>({
+    message: '',
+    isTyping: false,
+  });
 
   const handleSendMessage = () => {
-    socket.emit(Messages.ADD_MESSAGE_REQUEST, { roomId: roomStatus?.roomId, username, message });
+    socket.emit(Messages.ADD_MESSAGE_REQUEST, {
+      roomId: roomStatus?.roomId,
+      username: username,
+      message: message.message,
+    });
   };
 
-  const handleMessageTyping = () => {};
+  // Sets both the message value & isTyping flag -> figure out a better function name
+  const handleMessageTyping = _.debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessage({ message: e.target.value, isTyping: true });
 
-  const chatMessages = _.map(roomStatus?.chatState, (message, index) => (
-    <li key={index}>
-      {message.username}: {message.message}
-    </li>
-  ));
+    if (message.isTyping) {
+      socket.emit(Messages.ADD_TYPING_REQUEST, {
+        roomId: roomStatus?.roomId,
+        isTyping: message.isTyping,
+        username: username,
+      });
+    }
+  }, 400);
+
+  const chatMessages = _.map(roomStatus?.chatState, (message, index) => {
+    if (!message.isTyping) {
+      return (
+        <li key={index}>
+          <h4>
+            {message.username}: {message.message}
+          </h4>
+        </li>
+      );
+    } else {
+      return (
+        <li key={index}>
+          <h4>{message.username}: is typing...</h4>
+        </li>
+      );
+    }
+  });
 
   return (
-    <div>
-      <div className="chat-page">
+    <div style={{ width: '100%' }}>
+      <div className="chat-page" style={{ width: '100%' }}>
         <div className="chatArea">
           <ul className="messages" style={{ listStyleType: 'none' }}>
             {chatMessages}
@@ -41,7 +71,9 @@ export const Chat = (props: Props) => {
           className="inputMessage"
           type="roomId"
           placeholder="Type message here"
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            e.persist(), handleMessageTyping(e);
+          }}
           onPressEnter={() => handleSendMessage()}
         />
       </div>

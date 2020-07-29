@@ -19,6 +19,8 @@ export enum Messages {
   // Chat requests
   ADD_MESSAGE_REQUEST = 'add-message-request',
   ADD_MESSAGE_RESPONSE = 'add-message-response',
+  ADD_TYPING_REQUEST = 'add-typing-request',
+  ADD_TYPING_RESPONSE = 'add-typing-response',
 }
 
 export interface User {
@@ -43,9 +45,9 @@ export interface RoomPlaylistEntry {
 }
 
 export interface RoomChatState {
-  // messages: Array<{ username: string; message: string }>;
   username: string;
   message: string;
+  isTyping: boolean;
 }
 
 export interface RoomStatus {

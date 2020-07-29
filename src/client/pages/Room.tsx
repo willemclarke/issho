@@ -88,7 +88,6 @@ const videoPlayerReducer = (
 
 export const Room = () => {
   const { roomStatus, socket } = useRoom();
-  console.log('roomStatus: Room.tsx, ', roomStatus);
 
   const [error, setError] = React.useState<string | null>(null);
   const [videoState, dispatchVideoAction] = React.useReducer(logger(videoPlayerReducer), {
@@ -212,12 +211,12 @@ export const Room = () => {
           handlePlayAndPause={handlePlayAndPause}
           handleEnded={handleEnded}
         />
-        <Space>
+        <Space size="large" align="start">
           <UserList users={roomStatus.users} />
           <Chat roomStatus={roomStatus} socket={socket} />
         </Space>
-        <Divider />
-        <pre>{JSON.stringify(roomStatus, null, 2)}</pre>
+        {/* <Divider /> */}
+        {/* <pre>{JSON.stringify(roomStatus, null, 2)}</pre> */}
       </Col>
       <Col span={6} style={{ height: '100%', padding: '16px', overflowY: 'auto' }}>
         <Tabs defaultActiveKey="search">
