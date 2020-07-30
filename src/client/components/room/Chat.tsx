@@ -29,8 +29,8 @@ export const Chat = (props: Props) => {
   };
 
   // Sets both the message value & isTyping flag -> figure out a better function name
-  const handleMessageTyping = _.debounce((e: React.ChangeEvent<HTMLInputElement>) => {
-    setMessage({ message: e.target.value, isTyping: true });
+  const handleMessageTyping = _.debounce((eventValue: string) => {
+    setMessage({ message: eventValue, isTyping: true });
 
     if (message.isTyping) {
       socket.emit(Messages.ADD_TYPING_REQUEST, {
@@ -39,7 +39,7 @@ export const Chat = (props: Props) => {
         username: username,
       });
     }
-  }, 400);
+  }, 600);
 
   const chatMessages = _.map(roomStatus?.chatState, (message, index) => {
     if (!message.isTyping) {
@@ -71,9 +71,7 @@ export const Chat = (props: Props) => {
           className="inputMessage"
           type="roomId"
           placeholder="Type message here"
-          onChange={(e) => {
-            e.persist(), handleMessageTyping(e);
-          }}
+          onChange={(e) => handleMessageTyping(e.target.value)}
           onPressEnter={() => handleSendMessage()}
         />
       </div>
