@@ -7,6 +7,7 @@ import useSocket from 'use-socket.io-client';
 import { useAppContext } from './useAppContext';
 
 export interface RoomContext {
+  username: string | null;
   roomStatus: RoomStatus | null;
   socket: Socket;
 }
@@ -35,6 +36,7 @@ export const useRoom: () => RoomContext = () => {
   }, []);
 
   return {
+    username,
     roomStatus,
     socket,
   };

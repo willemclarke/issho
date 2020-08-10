@@ -87,7 +87,7 @@ const videoPlayerReducer = (
 };
 
 export const Room = () => {
-  const { roomStatus, socket } = useRoom();
+  const { roomStatus, socket, username } = useRoom();
 
   const [error, setError] = React.useState<string | null>(null);
   const [videoState, dispatchVideoAction] = React.useReducer(logger(videoPlayerReducer), {
@@ -150,7 +150,7 @@ export const Room = () => {
     );
   }
 
-  if (!roomStatus) {
+  if (!roomStatus || !username) {
     return (
       <Layout style={{ height: '100vh' }}>
         <Spin />
@@ -213,7 +213,7 @@ export const Room = () => {
         />
         <Space size="large" align="start">
           <UserList users={roomStatus.users} />
-          <Chat roomStatus={roomStatus} socket={socket} />
+          <Chat roomStatus={roomStatus} socket={socket} username={username} />
         </Space>
         {/* <Divider /> */}
         {/* <pre>{JSON.stringify(roomStatus, null, 2)}</pre> */}

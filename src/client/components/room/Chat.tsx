@@ -1,62 +1,50 @@
 import React from 'react';
-import _ from 'lodash';
+import _, { truncate } from 'lodash';
 import { Input } from 'antd';
-import { useLocationQuery } from '../../../client/hooks/useQuery';
 import { Messages, RoomStatus } from '../../../common/types';
 import { Socket } from 'socket.io';
+import { useTimeoutFn } from 'react-use';
 
 interface Props {
-  roomStatus: RoomStatus | null;
+  roomStatus: RoomStatus;
   socket: Socket;
+  username: string;
 }
 
 export const Chat = (props: Props) => {
-  const { roomStatus, socket } = props;
+  const { roomStatus, socket, username } = props;
   console.log('chat.tsx roomStatus: ', roomStatus);
 
-  const username = useLocationQuery().get('username');
-  const [message, setMessage] = React.useState<{ message: string; isTyping: boolean }>({
-    message: '',
-    isTyping: false,
-  });
-
-  const handleSendMessage = () => {
-    socket.emit(Messages.ADD_MESSAGE_REQUEST, {
+  const handleSendMessage = (text: string) => {
+    socket.emit(Messages.SEND_MESSAGE_REQUEST, {
       roomId: roomStatus?.roomId,
       username: username,
-      message: message.message,
+      text: text,
     });
   };
 
-  // Sets both the message value & isTyping flag -> figure out a better function name
-  const handleMessageTyping = _.debounce((eventValue: string) => {
-    setMessage({ message: eventValue, isTyping: true });
+  const handleMessageTyping = _.debounce(() => {
+    socket.emit(Messages.START_TYPING_REQUEST, {
+      roomId: roomStatus.roomId,
+      username: username,
+    });
+  }, 400);
 
-    if (message.isTyping) {
-      socket.emit(Messages.ADD_TYPING_REQUEST, {
-        roomId: roomStatus?.roomId,
-        isTyping: message.isTyping,
-        username: username,
-      });
-    }
-  }, 600);
+  React.useEffect(() => {
+    socket.on(Messages.START_TYPING_REQUEST, (msg) => {
+      console.log('msg', msg);
+      // setRoomStatus(status);
+    });
+  }, []);
 
-  const chatMessages = _.map(roomStatus?.chatState, (message, index) => {
-    if (!message.isTyping) {
-      return (
-        <li key={index}>
-          <h4>
-            {message.username}: {message.message}
-          </h4>
-        </li>
-      );
-    } else {
-      return (
-        <li key={index}>
-          <h4>{message.username}: is typing...</h4>
-        </li>
-      );
-    }
+  const chatMessages = _.map(roomStatus.chatState.messages, (message, index) => {
+    return (
+      <li key={index}>
+        <h4>
+          {message.username}: {message.text}
+        </h4>
+      </li>
+    );
   });
 
   return (
@@ -71,8 +59,9 @@ export const Chat = (props: Props) => {
           className="inputMessage"
           type="roomId"
           placeholder="Type message here"
-          onChange={(e) => handleMessageTyping(e.target.value)}
-          onPressEnter={() => handleSendMessage()}
+          allowClear={true}
+          onChange={(e) => handleMessageTyping()}
+          onPressEnter={(e) => handleSendMessage((e.target as any).value)}
         />
       </div>
     </div>

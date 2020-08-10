@@ -17,9 +17,9 @@ export enum Messages {
   PLAYLIST_ADD_REQUEST = 'playlist-add-request',
 
   // Chat requests
-  ADD_MESSAGE_REQUEST = 'add-message-request',
+  SEND_MESSAGE_REQUEST = 'send-message-request',
   ADD_MESSAGE_RESPONSE = 'add-message-response',
-  ADD_TYPING_REQUEST = 'add-typing-request',
+  START_TYPING_REQUEST = 'start-typing-request',
   ADD_TYPING_RESPONSE = 'add-typing-response',
 }
 
@@ -44,10 +44,13 @@ export interface RoomPlaylistEntry {
   addedByUsername: string;
 }
 
-export interface RoomChatState {
+interface ChatMessage {
   username: string;
-  message: string;
-  isTyping: boolean;
+  timestamp: Date;
+  text: string;
+}
+export interface RoomChatState {
+  messages: ChatMessage[];
 }
 
 export interface RoomStatus {
@@ -55,5 +58,5 @@ export interface RoomStatus {
   users: User[];
   videoPlayerState: RoomVideoPlayerState;
   playlist: RoomPlaylistEntry[];
-  chatState: RoomChatState[];
+  chatState: RoomChatState;
 }

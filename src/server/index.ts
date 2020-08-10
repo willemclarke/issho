@@ -94,8 +94,8 @@ io.on('connection', (socket: IsshoSocket) => {
     });
   });
 
-  socket.on(Messages.ADD_MESSAGE_REQUEST, (msg) => {
-    roomManager.addChatMessage(msg.roomId, msg.username, msg.message);
+  socket.on(Messages.SEND_MESSAGE_REQUEST, (msg) => {
+    roomManager.addChatMessage(msg.roomId, msg.username, msg.text);
 
     sendToAllInRoom({
       roomId: msg.roomId,
@@ -104,14 +104,12 @@ io.on('connection', (socket: IsshoSocket) => {
     });
   });
 
-  socket.on(Messages.ADD_TYPING_REQUEST, (msg) => {
-    console.log(msg);
-    roomManager.addChatTyping(msg.roomId, msg.username, msg.message);
-
-    sendToAllInRoom({
+  socket.on(Messages.START_TYPING_REQUEST, (msg) => {
+    sendToAllExcludingClient({
+      socket: socket,
       roomId: msg.roomId,
-      type: Messages.ROOM_STATUS_RESPONSE,
-      payload: roomManager.getRoomStatus(msg.roomId),
+      type: Messages.START_TYPING_REQUEST,
+      payload: msg,
     });
   });
 
@@ -125,7 +123,6 @@ io.on('connection', (socket: IsshoSocket) => {
   });
 
   socket.on(Messages.PLAYLIST_ADD_REQUEST, (msg) => {
-    console.log('socket users: ', socket.user);
     roomManager.addToPlaylist(msg.roomId, {
       addedByUsername: socket.user.username,
       url: msg.url,

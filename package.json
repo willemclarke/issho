@@ -25,6 +25,7 @@
     "react-player": "^2.5.0",
     "react-query": "^2.4.19",
     "react-router-dom": "^5.2.0",
+    "react-use": "^15.3.3",
     "request-promise": "^4.2.5",
     "socket.io": "^2.3.0",
     "use-reducer-logger": "^1.0.2",

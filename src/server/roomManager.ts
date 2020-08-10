@@ -57,7 +57,7 @@ export class RoomManager {
           currentPlaylistId: undefined,
         },
         playlist: [],
-        chatState: [],
+        chatState: { messages: [] },
       };
     } else {
       this.store[roomId] = {
@@ -116,36 +116,18 @@ export class RoomManager {
     this.store[roomId].videoPlayerState = videoPlayerState;
   }
 
-  addChatMessage(roomId: string, username: string, message: string): void {
+  addChatMessage(roomId: string, username: string, text: string): void {
     const roomStatus = this.getRoomStatus(roomId);
 
     if (!roomStatus) {
       return;
     }
 
-    const chatStateWithAddedMessage = _.concat(roomStatus.chatState, {
+    this.store[roomId].chatState.messages = _.concat(roomStatus.chatState.messages, {
       username,
-      message,
-      isTyping: false,
+      text,
+      timestamp: new Date(),
     });
-
-    this.store[roomId].chatState = chatStateWithAddedMessage;
-  }
-
-  addChatTyping(roomId: string, username: string, message: string): void {
-    const roomStatus = this.getRoomStatus(roomId);
-
-    if (!roomStatus) {
-      return;
-    }
-
-    const chatStateWithIsTyping = _.concat(roomStatus.chatState, {
-      username,
-      message,
-      isTyping: true,
-    });
-
-    this.store[roomId].chatState = chatStateWithIsTyping;
   }
 
   addToPlaylist(
