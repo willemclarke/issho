@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import { Input, Space, Dropdown, Menu, Button } from 'antd';
+import { Input, Space } from 'antd';
 import { Messages, RoomStatus } from '../../../common/types';
 import { Socket } from 'socket.io';
 import { HeartOutlined } from '@ant-design/icons';
@@ -13,6 +13,8 @@ interface Props {
 
 export const Chat = (props: Props) => {
   const { roomStatus, socket, username } = props;
+
+  const [inputValue, setInputValue] = React.useState('');
 
   const handleSendMessage = (text: string) => {
     socket.emit(Messages.SEND_MESSAGE_REQUEST, {
@@ -46,18 +48,6 @@ export const Chat = (props: Props) => {
     );
   });
 
-  const usersForDropdownMenu = _.map(roomStatus.users, (user, index) => {
-    return (
-      <Menu.Item>
-        <a target="_blank" rel="noopener noreferrer" href="http://www.alipay.com/">
-          {user.username}
-        </a>
-      </Menu.Item>
-    );
-  });
-
-  const dropDownConnectedUsers = <Menu>{usersForDropdownMenu}</Menu>;
-
   const chatMessages = _.map(roomStatus.chatState.messages, (message, index) => {
     return (
       <li key={index}>
@@ -70,9 +60,6 @@ export const Chat = (props: Props) => {
 
   return (
     <div style={{ backgroundColor: '#F0F0F0' }}>
-      <Dropdown overlay={dropDownConnectedUsers} placement="bottomCenter">
-        <Button style={{ width: '100%' }}>Connected Users</Button>
-      </Dropdown>
       <div style={{ height: '615px', padding: '10px', listStyleType: 'none', overflowY: 'auto' }}>
         {chatMessages}
       </div>
@@ -81,9 +68,11 @@ export const Chat = (props: Props) => {
           className="inputMessage"
           type="roomId"
           placeholder="Type message here"
-          allowClear={true}
-          onChange={(e) => handleMessageTyping()}
-          onPressEnter={(e) => handleSendMessage((e.target as any).value)}
+          onChange={(e) => setInputValue(e.target.value)}
+          value={inputValue}
+          onPressEnter={(e) => {
+            handleSendMessage((e.target as any).value), setInputValue('');
+          }}
         />
       </div>
     </div>

@@ -228,6 +228,9 @@ export const Room = () => {
           <Tabs.TabPane tab="Chat" key="chat">
             <Chat roomStatus={roomStatus} socket={socket} username={username} />
           </Tabs.TabPane>
+          <Tabs.TabPane tab="Users" key="userList">
+            <UserList users={roomStatus.users} />
+          </Tabs.TabPane>
         </Tabs>
       </Col>
     </Row>
