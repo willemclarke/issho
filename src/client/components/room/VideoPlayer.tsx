@@ -23,7 +23,7 @@ export const VideoPlayer = (props: Props) => {
       <ReactPlayer
         url={url}
         width="100%"
-        height="65%"
+        height="90%"
         controls={true}
         playing={videoState.playing}
         onPlay={handlePlay}

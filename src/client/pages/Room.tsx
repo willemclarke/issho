@@ -202,7 +202,7 @@ export const Room = () => {
 
   return (
     <Row style={{ height: '100%' }}>
-      <Col span={18} style={{ height: '100%', padding: '16px' }}>
+      <Col span={18} style={{ height: '100%', padding: '25px' }}>
         <VideoPlayer
           playlist={roomStatus.playlist}
           videoState={videoState}
@@ -211,14 +211,9 @@ export const Room = () => {
           handlePlayAndPause={handlePlayAndPause}
           handleEnded={handleEnded}
         />
-        <Space size="large" align="start">
-          <UserList users={roomStatus.users} />
-          <Chat roomStatus={roomStatus} socket={socket} username={username} />
-        </Space>
-        {/* <Divider /> */}
         {/* <pre>{JSON.stringify(roomStatus, null, 2)}</pre> */}
       </Col>
-      <Col span={6} style={{ height: '100%', padding: '16px', overflowY: 'auto' }}>
+      <Col span={6} style={{ height: '100%', padding: '25px', overflowY: 'auto' }}>
         <Tabs defaultActiveKey="search">
           <Tabs.TabPane tab="Search youtube" key="search">
             <VideoSearch onPlaylistAdd={handlePlaylistAdd} />
@@ -229,6 +224,9 @@ export const Room = () => {
               onDelete={handlePlaylistDelete}
               onClick={handlePlaylistVideoClick}
             />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Chat" key="chat">
+            <Chat roomStatus={roomStatus} socket={socket} username={username} />
           </Tabs.TabPane>
         </Tabs>
       </Col>

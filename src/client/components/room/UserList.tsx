@@ -21,7 +21,7 @@ export const UserList = (props: Props) => {
   });
 
   return (
-    <div>
+    <div style={{ height: '232px', overflowY: 'auto' }}>
       <h2>Connected users:</h2>
       {userList}
     </div>
