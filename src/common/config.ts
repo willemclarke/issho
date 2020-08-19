@@ -6,6 +6,7 @@ export interface Config {
   youtubeToken: string;
   webSocketApi: string;
   webSocketSecure: boolean;
+  webSocketInviteUserLink: string;
 }
 
 // To do: need to fix (process.env[value]) returns undefined,
@@ -24,5 +25,6 @@ export const fromEnv = (): Config => {
     youtubeToken: process.env.YOUTUBE_TOKEN as string,
     webSocketApi: process.env.WEB_SOCKET_API as string,
     webSocketSecure: (process.env.WEB_SOCKET_SECURE === 'true') as boolean,
+    webSocketInviteUserLink: process.env.WEB_SOCKET_INVITE_USER_LINK as string,
   };
 };

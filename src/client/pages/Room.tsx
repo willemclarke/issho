@@ -11,6 +11,7 @@ import { useRoom } from '../hooks/useRoom';
 import { Link, useParams } from 'react-router-dom';
 import { VideoPlaylist } from '../components/room/VideoPlaylist';
 import { Chat } from '../components/room/Chat';
+import { useAppContext } from '../../client/hooks/useAppContext';
 
 enum VideoPlayerAction {
   SET_STATE = 'SET_STATE',
@@ -88,11 +89,13 @@ const videoPlayerReducer = (
 };
 
 export const Room = () => {
+  const { config } = useAppContext();
   const { roomStatus, socket, username } = useRoom();
 
+  // Note: use roomStatus.roomId opposed to useParams
   const { roomId } = useParams();
   const [copyState, setCopyState] = React.useState<{ value: string; copied: boolean }>({
-    value: `localhost:1234?roomName=${roomId}`,
+    value: `${config.webSocketInviteUserLink}?roomName=${roomId}`,
     copied: false,
   });
   const [error, setError] = React.useState<string | null>(null);
