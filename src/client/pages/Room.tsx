@@ -1,13 +1,14 @@
 import React from 'react';
 import logger from 'use-reducer-logger';
-import { Col, Row, Spin, Result, Button, Tabs, Divider, Layout, Space } from 'antd';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { Col, Row, Spin, Result, Button, Tabs, Divider, Layout } from 'antd';
 import { FrownOutlined } from '@ant-design/icons';
 import { Messages } from '../../common/types';
 import { UserList } from '../components/room/UserList';
 import { VideoPlayer } from '../components/room/VideoPlayer';
 import { VideoSearch } from '../components/room/VideoSearch';
 import { useRoom } from '../hooks/useRoom';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { VideoPlaylist } from '../components/room/VideoPlaylist';
 import { Chat } from '../components/room/Chat';
 
@@ -89,6 +90,11 @@ const videoPlayerReducer = (
 export const Room = () => {
   const { roomStatus, socket, username } = useRoom();
 
+  const { roomId } = useParams();
+  const [copyState, setCopyState] = React.useState<{ value: string; copied: boolean }>({
+    value: `localhost:1234?roomName=${roomId}`,
+    copied: false,
+  });
   const [error, setError] = React.useState<string | null>(null);
   const [videoState, dispatchVideoAction] = React.useReducer(logger(videoPlayerReducer), {
     currentPlaylistId: undefined,
@@ -211,6 +217,13 @@ export const Room = () => {
           handlePlayAndPause={handlePlayAndPause}
           handleEnded={handleEnded}
         />
+        <CopyToClipboard
+          onCopy={() => setCopyState({ value: copyState.value, copied: true })}
+          text={copyState.value}
+        >
+          <Button>Invite User to Room</Button>
+        </CopyToClipboard>
+        <Divider />
         {/* <pre>{JSON.stringify(roomStatus, null, 2)}</pre> */}
       </Col>
       <Col span={6} style={{ height: '100%', padding: '25px', overflowY: 'auto' }}>

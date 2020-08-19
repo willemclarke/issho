@@ -1,22 +1,24 @@
 import React from 'react';
 import useSocket from 'use-socket.io-client';
-import { Alert, Button, Col, Form, Input, Row, Typography } from 'antd';
+import { Alert, Button, Col, Form, Input, Row } from 'antd';
 import { useHistory } from 'react-router';
 import { Messages } from '../../common/types';
 import { useAppContext } from '../hooks/useAppContext';
-
-const { Title } = Typography;
+import { useLocationQuery } from '../../client/hooks/useQuery';
+import _ from 'lodash';
 
 export const Landing = () => {
   const { config } = useAppContext();
+
   const [socket] = useSocket(config.webSocketApi, {
     autoConnect: true,
     secure: config.webSocketSecure,
   });
   const history = useHistory();
 
+  const roomName = useLocationQuery().get('roomName');
   const [username, setUsername] = React.useState('');
-  const [roomId, setRoomId] = React.useState('');
+  const [roomId, setRoomId] = React.useState(roomName);
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -39,13 +41,18 @@ export const Landing = () => {
     <Row justify="center" style={{ marginTop: '2rem' }}>
       <Col xs={4} xxl={5}>
         <Form name="landing" className="landing-form" onFinish={onSubmit}>
-          <Form.Item name="roomId" rules={[{ required: true, message: 'Please enter room name' }]}>
-            <Input
-              type="roomId"
-              placeholder="Enter room name"
-              onChange={(e) => setRoomId(e.target.value)}
-            />
-          </Form.Item>
+          {_.isNil(roomName) ? (
+            <Form.Item
+              name="roomId"
+              rules={[{ required: true, message: 'Please enter room name' }]}
+            >
+              <Input
+                type="roomId"
+                placeholder="Enter room name"
+                onChange={(e) => setRoomId(e.target.value)}
+              />
+            </Form.Item>
+          ) : null}
           <Form.Item name="username" rules={[{ required: true, message: 'Please enter username' }]}>
             <Input
               placeholder="Enter username"
