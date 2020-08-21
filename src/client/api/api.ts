@@ -3,12 +3,14 @@ import _ from 'lodash';
 
 export interface YoutubeResponse {
   kind: string;
+  nextPageToken: string;
   etag: string;
   items: YoutubeResponseItem[];
 }
 
 export interface YoutubeResponseItem {
   etag: string;
+
   id: {
     videoId: string;
   };
@@ -38,10 +40,20 @@ export interface YoutubeResponseItem {
   };
 }
 
-// https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=25&q=${SEARCH_TERM}&key=${env.key}
-export async function youtubeSearch(token: string, query: string): Promise<YoutubeResponse> {
+export async function youtubeSearch(
+  token: string,
+  query: string,
+  pageToken?: string,
+): Promise<YoutubeResponse> {
   const options = {
-    url: `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=25&q=${query}&key=${token}`,
+    url: 'https://www.googleapis.com/youtube/v3/search',
+    qs: {
+      part: 'snippet',
+      maxResults: 1,
+      q: query,
+      key: token,
+      pageToken,
+    },
     json: true,
   };
   const response = await rp(options);

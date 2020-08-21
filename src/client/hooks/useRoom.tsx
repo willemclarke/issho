@@ -4,16 +4,20 @@ import { Messages, RoomStatus } from '../../common/types';
 import { useLocationQuery } from '../hooks/useQuery';
 import { Socket } from 'socket.io';
 import useSocket from 'use-socket.io-client';
-import { useAppContext  } from "./useAppContext"
+import { useAppContext } from './useAppContext';
 
 export interface RoomContext {
+  username: string | null;
   roomStatus: RoomStatus | null;
   socket: Socket;
 }
 
 export const useRoom: () => RoomContext = () => {
-  const { config } = useAppContext()
-  const [socket] = useSocket(config.webSocketApi, { autoConnect: true });
+  const { config } = useAppContext();
+  const [socket] = useSocket(config.webSocketApi, {
+    autoConnect: true,
+    secure: config.webSocketSecure,
+  });
   const { roomId } = useParams();
   const username = useLocationQuery().get('username');
 
@@ -21,6 +25,7 @@ export const useRoom: () => RoomContext = () => {
 
   React.useEffect(() => {
     socket.on(Messages.ROOM_STATUS_RESPONSE, (status: RoomStatus) => {
+      console.log('status', status);
       setRoomStatus(status);
     });
 
@@ -31,6 +36,7 @@ export const useRoom: () => RoomContext = () => {
   }, []);
 
   return {
+    username,
     roomStatus,
     socket,
   };

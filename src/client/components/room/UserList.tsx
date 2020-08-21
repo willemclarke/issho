@@ -20,10 +20,5 @@ export const UserList = (props: Props) => {
     );
   });
 
-  return (
-    <div>
-      <h2>Connected users:</h2>
-      {userList}
-    </div>
-  );
+  return <div style={{ overflowY: 'auto' }}>{userList}</div>;
 };

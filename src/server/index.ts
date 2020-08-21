@@ -15,15 +15,40 @@ const port = process.env.PORT || 3000;
 
 const roomManager = new RoomManager();
 
+const sendToAllInRoom = (options: { roomId: string; type: Messages; payload: any }): void => {
+  io.in(options.roomId).emit(options.type, options.payload);
+};
+
+const sendToClient = (options: { socket: IsshoSocket; type: Messages; payload: any }): void => {
+  options.socket.emit(options.type, options.payload);
+};
+
+const sendToAllExcludingClient = (options: {
+  socket: IsshoSocket;
+  roomId: string;
+  type: Messages;
+  payload: any;
+}): void => {
+  options.socket.to(options.roomId).emit(options.type, options.payload);
+};
+
 io.on('connection', (socket: IsshoSocket) => {
   socket.on(Messages.CAN_JOIN_ROOM_REQUEST, (info) => {
     const { roomId, username } = info;
 
     if (roomManager.canJoinRoom(roomId, username)) {
-      socket.emit(Messages.CAN_JOIN_ROOM_RESPONSE, { error: null, username, roomId });
+      sendToClient({
+        socket,
+        type: Messages.CAN_JOIN_ROOM_RESPONSE,
+        payload: { error: null, username, roomId },
+      });
     } else {
-      socket.emit(Messages.CAN_JOIN_ROOM_RESPONSE, {
-        error: `User ${username} already exists within the room: ${roomId}, please choose another username`,
+      sendToClient({
+        socket,
+        type: Messages.CAN_JOIN_ROOM_RESPONSE,
+        payload: {
+          error: `User ${username} already exists within the room: ${roomId}, please choose another username`,
+        },
       });
     }
   });
@@ -39,23 +64,77 @@ io.on('connection', (socket: IsshoSocket) => {
         socket.user = { roomId, username };
         socket.join(roomId);
         // Send room status back to ALL clients
-        io.in(roomId).emit(Messages.ROOM_STATUS_RESPONSE, roomManager.getRoomStatus(roomId));
+        sendToAllInRoom({
+          roomId,
+          type: Messages.ROOM_STATUS_RESPONSE,
+          payload: roomManager.getRoomStatus(roomId),
+        });
         break;
       }
       case RoomManagerError.JOIN_ROOM_DUPLICATE_USER: {
-        //TODO: Match on this error
-        socket.emit(Messages.INVALID_JOIN_ROOM_RESPONSE, {
-          errorMessage: `User ${username} already exists within the room: ${roomId}, please choose another username `,
+        sendToClient({
+          socket,
+          type: Messages.INVALID_JOIN_ROOM_RESPONSE,
+          payload: {
+            error: `User ${username} already exists within the room: ${roomId}, please choose another username`,
+          },
         });
       }
     }
   });
 
   socket.on(Messages.ROOM_VIDEO_STATE_REQUEST, (msg) => {
-    roomManager.setVideoState(msg.roomId, msg.roomVideoPlayerState);
-    socket
-      .to(msg.roomId)
-      .emit(Messages.ROOM_STATUS_RESPONSE, roomManager.getRoomStatus(msg.roomId));
+    roomManager.handleVideoState(msg.roomId, msg.roomVideoPlayerState);
+    const roomStatus = roomManager.getRoomStatus(msg.roomId);
+
+    sendToAllInRoom({
+      roomId: msg.roomId,
+      type: Messages.ROOM_STATUS_RESPONSE,
+      payload: roomStatus,
+    });
+  });
+
+  socket.on(Messages.SEND_MESSAGE_REQUEST, (msg) => {
+    roomManager.addChatMessage(msg.roomId, msg.username, msg.text);
+
+    sendToAllInRoom({
+      roomId: msg.roomId,
+      type: Messages.ROOM_STATUS_RESPONSE,
+      payload: roomManager.getRoomStatus(msg.roomId),
+    });
+  });
+
+  socket.on(Messages.START_TYPING_REQUEST, (msg) => {
+    sendToAllExcludingClient({
+      socket: socket,
+      roomId: msg.roomId,
+      type: Messages.START_TYPING_REQUEST,
+      payload: msg,
+    });
+  });
+
+  socket.on(Messages.PLAYLIST_DELETE_REQUEST, (msg) => {
+    roomManager.deleteFromPlaylist(msg.roomId, msg.id);
+    sendToAllInRoom({
+      roomId: msg.roomId,
+      type: Messages.ROOM_STATUS_RESPONSE,
+      payload: roomManager.getRoomStatus(msg.roomId),
+    });
+  });
+
+  socket.on(Messages.PLAYLIST_ADD_REQUEST, (msg) => {
+    roomManager.addToPlaylist(msg.roomId, {
+      addedByUsername: socket.user.username,
+      url: msg.url,
+      thumbnailUrl: msg.thumbnailUrl,
+      title: msg.title,
+      channelTitle: msg.channelTitle,
+    });
+    sendToAllInRoom({
+      roomId: msg.roomId,
+      type: Messages.ROOM_STATUS_RESPONSE,
+      payload: roomManager.getRoomStatus(msg.roomId),
+    });
   });
 
   socket.on('disconnecting', () => {
@@ -63,7 +142,11 @@ io.on('connection', (socket: IsshoSocket) => {
       socket.leave(roomId, () => {
         if (socket.user) {
           roomManager.leaveRoom(roomId, socket.user.username);
-          io.in(roomId).emit(Messages.ROOM_STATUS_RESPONSE, roomManager.getRoomStatus(roomId));
+          sendToAllInRoom({
+            roomId,
+            type: Messages.ROOM_STATUS_RESPONSE,
+            payload: roomManager.getRoomStatus(roomId),
+          });
         }
       });
     });

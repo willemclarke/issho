@@ -1,24 +1,30 @@
 import React from 'react';
-import { Col, Row, Spin, Result, Button } from 'antd';
+import logger from 'use-reducer-logger';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { Col, Row, Spin, Result, Button, Tabs, Divider, Layout } from 'antd';
 import { FrownOutlined } from '@ant-design/icons';
 import { Messages } from '../../common/types';
 import { UserList } from '../components/room/UserList';
 import { VideoPlayer } from '../components/room/VideoPlayer';
 import { VideoSearch } from '../components/room/VideoSearch';
 import { useRoom } from '../hooks/useRoom';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { VideoPlaylist } from '../components/room/VideoPlaylist';
+import { Chat } from '../components/room/Chat';
+import { useAppContext } from '../../client/hooks/useAppContext';
 
 enum VideoPlayerAction {
-  SET_STATE,
-  CHANGE_VIDEO_URL,
-  PLAY_PAUSE,
-  PLAY,
-  PAUSE,
-  SEEK,
+  SET_STATE = 'SET_STATE',
+  CHANGE_CURRENT_PLAYLIST_ID = 'CHANGE_CURRENT_PLAYLIST_ID',
+  PLAY_PAUSE = 'PLAY_PAUSE',
+  PLAY = 'PLAY',
+  PAUSE = 'PAUSE',
+  SEEK = 'SEEK',
+  ENDED = 'ENDED',
 }
 
 export interface VideoState {
-  url: null | string;
+  currentPlaylistId?: string;
   pip: boolean;
   playing: boolean;
   controls: boolean;
@@ -30,6 +36,7 @@ export interface VideoState {
   duration: number;
   playbackRate: number;
   loop: boolean;
+  ended: boolean;
   lastAction: Date;
 }
 
@@ -61,24 +68,39 @@ const videoPlayerReducer = (
         playing: !initialState.playing,
         lastAction: new Date(),
       };
-    case VideoPlayerAction.CHANGE_VIDEO_URL:
+    case VideoPlayerAction.ENDED:
+      return {
+        ...initialState,
+        playing: false,
+        ended: true,
+        lastAction: new Date(),
+      };
+    case VideoPlayerAction.CHANGE_CURRENT_PLAYLIST_ID:
       return {
         ...initialState,
         playing: true,
-        url: action.payload.url,
+        currentPlaylistId: action.payload.id,
         lastAction: new Date(),
       };
+
     default:
       throw new Error(`No reducer to match action:  ${action}`);
   }
 };
 
 export const Room = () => {
-  const { roomStatus, socket } = useRoom();
+  const { config } = useAppContext();
+  const { roomStatus, socket, username } = useRoom();
 
+  // Note: use roomStatus.roomId opposed to useParams
+  const { roomId } = useParams();
+  const [copyState, setCopyState] = React.useState<{ value: string; copied: boolean }>({
+    value: `${config.webSocketInviteUserLink}?roomName=${roomId}`,
+    copied: false,
+  });
   const [error, setError] = React.useState<string | null>(null);
-  const [videoState, dispatch] = React.useReducer(videoPlayerReducer, {
-    url: 'https://www.youtube.com/watch?v=TSN5r_UfIXQ',
+  const [videoState, dispatchVideoAction] = React.useReducer(logger(videoPlayerReducer), {
+    currentPlaylistId: undefined,
     pip: false,
     playing: false,
     controls: true,
@@ -90,18 +112,22 @@ export const Room = () => {
     duration: 0,
     playbackRate: 1.0,
     loop: false,
+    ended: false,
     lastAction: new Date(),
   });
 
   React.useEffect(() => {
     if (roomStatus?.videoPlayerState) {
-      dispatch({ type: VideoPlayerAction.SET_STATE, payload: roomStatus?.videoPlayerState });
+      dispatchVideoAction({
+        type: VideoPlayerAction.SET_STATE,
+        payload: roomStatus?.videoPlayerState,
+      });
     }
   }, [roomStatus]);
 
   React.useEffect(() => {
-    socket.on(Messages.INVALID_JOIN_ROOM_RESPONSE, (data: { errorMessage: string }) => {
-      setError(data.errorMessage);
+    socket.on(Messages.INVALID_JOIN_ROOM_RESPONSE, (data: { error: string }) => {
+      setError(data.error);
     });
   }, []);
 
@@ -111,27 +137,12 @@ export const Room = () => {
         roomId: roomStatus.roomId,
         roomVideoPlayerState: {
           playing: videoState.playing,
-          url: videoState.url,
+          ended: videoState.ended,
+          currentPlaylistId: videoState.currentPlaylistId,
         },
       });
     }
   }, [videoState.lastAction]);
-
-  const handlePlay = () => {
-    dispatch({ type: VideoPlayerAction.PLAY });
-  };
-
-  const handlePause = () => {
-    dispatch({ type: VideoPlayerAction.PAUSE });
-  };
-
-  const handlePlayAndPause = () => {
-    dispatch({ type: VideoPlayerAction.PLAY_PAUSE });
-  };
-
-  const handleVideoClick = (url: string) => {
-    dispatch({ type: VideoPlayerAction.CHANGE_VIDEO_URL, payload: { url } });
-  };
 
   if (error) {
     return (
@@ -148,23 +159,95 @@ export const Room = () => {
     );
   }
 
-  if (!roomStatus) {
-    return <Spin />;
+  if (!roomStatus || !username) {
+    return (
+      <Layout style={{ height: '100vh' }}>
+        <Spin />
+      </Layout>
+    );
   }
+
+  const handlePlay = () => {
+    dispatchVideoAction({ type: VideoPlayerAction.PLAY });
+  };
+
+  const handlePause = () => {
+    dispatchVideoAction({ type: VideoPlayerAction.PAUSE });
+  };
+
+  const handlePlayAndPause = () => {
+    dispatchVideoAction({ type: VideoPlayerAction.PLAY_PAUSE });
+  };
+
+  const handleEnded = () => {
+    dispatchVideoAction({ type: VideoPlayerAction.ENDED });
+  };
+
+  const handlePlaylistVideoClick = (id: string) => {
+    dispatchVideoAction({ type: VideoPlayerAction.CHANGE_CURRENT_PLAYLIST_ID, payload: { id } });
+  };
+
+  const handlePlaylistDelete = (id: string) => {
+    socket.emit(Messages.PLAYLIST_DELETE_REQUEST, {
+      roomId: roomStatus.roomId,
+      id: id,
+    });
+  };
+
+  const handlePlaylistAdd = (
+    url: string,
+    title: string,
+    channelTitle: string,
+    thumbnailUrl: string,
+  ) => {
+    socket.emit(Messages.PLAYLIST_ADD_REQUEST, {
+      roomId: roomStatus.roomId,
+      url,
+      title,
+      channelTitle,
+      thumbnailUrl,
+    });
+  };
 
   return (
     <Row style={{ height: '100%' }}>
-      <Col span={18} style={{ height: '100%', padding: '16px' }}>
+      <Col span={18} style={{ height: '100%', padding: '25px' }}>
         <VideoPlayer
+          playlist={roomStatus.playlist}
           videoState={videoState}
           handlePlay={handlePlay}
           handlePause={handlePause}
           handlePlayAndPause={handlePlayAndPause}
+          handleEnded={handleEnded}
         />
-        <UserList users={roomStatus.users} />
+        <CopyToClipboard
+          onCopy={() => setCopyState({ value: copyState.value, copied: true })}
+          text={copyState.value}
+        >
+          <Button>Invite User to Room</Button>
+        </CopyToClipboard>
+        <Divider />
+        {/* <pre>{JSON.stringify(roomStatus, null, 2)}</pre> */}
       </Col>
-      <Col span={6} style={{ height: '100%', padding: '16px', overflowY: 'auto' }}>
-        <VideoSearch onVideoClick={handleVideoClick} />
+      <Col span={6} style={{ height: '100%', padding: '25px', overflowY: 'auto' }}>
+        <Tabs defaultActiveKey="search">
+          <Tabs.TabPane tab="Search youtube" key="search">
+            <VideoSearch onPlaylistAdd={handlePlaylistAdd} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Playlist" key="playlist">
+            <VideoPlaylist
+              roomStatus={roomStatus}
+              onDelete={handlePlaylistDelete}
+              onClick={handlePlaylistVideoClick}
+            />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Chat" key="chat">
+            <Chat roomStatus={roomStatus} socket={socket} username={username} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Users" key="userList">
+            <UserList users={roomStatus.users} />
+          </Tabs.TabPane>
+        </Tabs>
       </Col>
     </Row>
   );

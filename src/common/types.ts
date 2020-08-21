@@ -10,6 +10,17 @@ export enum Messages {
   ROOM_STATUS_RESPONSE = 'room-status-response',
   INVALID_JOIN_ROOM_RESPONSE = 'invalid-join-room-response',
   ROOM_VIDEO_STATE_REQUEST = 'room-video-state-request',
+  ROOM_CHAT_STATE_REQUEST = 'room-chat-state-request',
+
+  // Playlist requests
+  PLAYLIST_DELETE_REQUEST = 'playlist-delete-request',
+  PLAYLIST_ADD_REQUEST = 'playlist-add-request',
+
+  // Chat requests
+  SEND_MESSAGE_REQUEST = 'send-message-request',
+  ADD_MESSAGE_RESPONSE = 'add-message-response',
+  START_TYPING_REQUEST = 'start-typing-request',
+  ADD_TYPING_RESPONSE = 'add-typing-response',
 }
 
 export interface User {
@@ -17,17 +28,29 @@ export interface User {
   username: string;
 }
 
-// Type we share across the room.
+// Types we share across the room.
 export interface RoomVideoPlayerState {
   playing: boolean;
-  url: string;
+  currentPlaylistId?: string;
+  ended: boolean;
 }
 
 export interface RoomPlaylistEntry {
+  id: string;
   url: string;
-  name: string;
+  title: string;
+  channelTitle: string;
   thumbnailUrl: string;
   addedByUsername: string;
+}
+
+interface ChatMessage {
+  username: string;
+  timestamp: Date;
+  text: string;
+}
+export interface RoomChatState {
+  messages: ChatMessage[];
 }
 
 export interface RoomStatus {
@@ -35,4 +58,5 @@ export interface RoomStatus {
   users: User[];
   videoPlayerState: RoomVideoPlayerState;
   playlist: RoomPlaylistEntry[];
+  chatState: RoomChatState;
 }
