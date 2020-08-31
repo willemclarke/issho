@@ -1,11 +1,11 @@
 import React from 'react';
+import _ from 'lodash';
 import useSocket from 'use-socket.io-client';
 import { Alert, Button, Col, Form, Input, Row } from 'antd';
 import { useHistory } from 'react-router';
 import { Messages } from '../../common/types';
 import { useAppContext } from '../hooks/useAppContext';
 import { useLocationQuery } from '../../client/hooks/useQuery';
-import _ from 'lodash';
 
 export const Landing = () => {
   const { config } = useAppContext();

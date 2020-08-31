@@ -211,8 +211,6 @@ export const Room = () => {
           handlePlayAndPause={handlePlayAndPause}
           handleEnded={handleEnded}
         />
-        <InviteUserButton roomId={roomStatus.roomId} />
-        {/* <pre>{JSON.stringify(roomStatus, null, 2)}</pre> */}
       </Col>
       <Col span={6} style={{ height: '100%', padding: '25px 25px 25px 0px', overflowY: 'auto' }}>
         <Tabs defaultActiveKey="search">
@@ -231,6 +229,7 @@ export const Room = () => {
           </Tabs.TabPane>
           <Tabs.TabPane tab="Users" key="userList">
             <UserList users={roomStatus.users} />
+            <InviteUserButton roomId={roomStatus.roomId} />
           </Tabs.TabPane>
         </Tabs>
       </Col>
