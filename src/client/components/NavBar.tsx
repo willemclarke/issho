@@ -13,7 +13,7 @@ const BrandNav = () => {
 
 const GitHub = () => {
   return (
-    <a href="https://github.com/willemclarke">
+    <a href="https://github.com/willemclarke/issho">
       <span style={{ marginLeft: '1rem', fontSize: '2rem', color: 'white' }}>
         <GithubOutlined />
       </span>

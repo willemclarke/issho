@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import ReactPlayer from 'react-player';
 import { VideoState } from '../../pages/Room';
-import { RoomPlaylistEntry } from '~common/types';
+import { RoomPlaylistEntry } from '../../../common/types';
 
 interface Props {
   videoState: VideoState;
@@ -24,6 +24,7 @@ export const VideoPlayer = (props: Props) => {
         url={url}
         width="100%"
         height="90%"
+        style={{ backgroundColor: 'black' }}
         controls={true}
         playing={videoState.playing}
         onPlay={handlePlay}
@@ -35,6 +36,7 @@ export const VideoPlayer = (props: Props) => {
           },
         }}
       />
+
       {/* <CommandBar handlePlayAndPause={handlePlayAndPause} playing={videoState.playing} /> */}
     </>
   );
