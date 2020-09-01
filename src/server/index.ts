@@ -111,8 +111,7 @@ io.on('connection', (socket: IsshoSocket) => {
   });
 
   socket.on(Messages.START_TYPING_REQUEST, (msg) => {
-    sendToAllExcludingClient({
-      socket: socket,
+    sendToAllInRoom({
       roomId: msg.roomId,
       type: Messages.START_TYPING_REQUEST,
       payload: msg,
