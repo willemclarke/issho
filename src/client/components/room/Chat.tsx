@@ -23,10 +23,12 @@ export const Chat = (props: Props) => {
   // create function which _.delay remove latest user from the state array
   // iterate over array and render their username + 'is typing..'
   // Note: change typingMessages state name and revise typingChatMessage()
+  // Note: becomes very laggy, I speculate its due to _.uniq being called for every time a key is pressed
 
   React.useEffect(() => {
     socket.on(Messages.START_TYPING_REQUEST, (msg) => {
-      setTypingMessages([...typingMessages, msg.username]);
+      setTypingMessages([msg.username]);
+      _.uniq(typingMessages);
       _.delay(() => setTypingMessages([]), 1500);
     });
   }, [typingMessages]);
@@ -48,9 +50,9 @@ export const Chat = (props: Props) => {
 
   const typingChatMessage = _.map(typingMessages, (username, index) => {
     return (
-      <li key={index}>
-        <ul>{username} is typing</ul>
-      </li>
+      <span key={index}>
+        <h5>{username} is typing</h5>
+      </span>
     );
   });
 
@@ -66,9 +68,9 @@ export const Chat = (props: Props) => {
     <div style={{ backgroundColor: '#F0F0F0' }}>
       <div style={{ height: '615px', padding: '10px', listStyleType: 'none', overflowY: 'auto' }}>
         {chatMessages}
-        {typingChatMessage}
       </div>
       <div style={{ width: '100%' }}>
+        {typingChatMessage}
         <Input
           className="inputMessage"
           type="roomId"
