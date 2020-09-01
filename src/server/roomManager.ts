@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { RoomStatus, RoomVideoPlayerState, RoomChatState } from '../common/types';
+import { RoomStatus, RoomVideoPlayerState, MessageType } from '../common/types';
 import { randomString } from '../common/utils';
 
 interface RoomStore {
@@ -124,7 +124,22 @@ export class RoomManager {
     }
 
     this.store[roomId].chatState.messages = _.concat(roomStatus.chatState.messages, {
+      type: MessageType.CHAT,
       username,
+      text,
+      timestamp: new Date(),
+    });
+  }
+
+  addRoomMessage(roomId: string, text: string): void {
+    const roomStatus = this.getRoomStatus(roomId);
+
+    if (!roomStatus) {
+      return;
+    }
+
+    this.store[roomId].chatState.messages = _.concat(roomStatus.chatState.messages, {
+      type: MessageType.ROOM,
       text,
       timestamp: new Date(),
     });

@@ -63,12 +63,18 @@ io.on('connection', (socket: IsshoSocket) => {
         // Join the room in SocketIO land
         socket.user = { roomId, username };
         socket.join(roomId);
+
+        // Handling user connected chat message :
+        const userJoinRoomMessage = `${username} joined the room`;
+        roomManager.addRoomMessage(roomId, userJoinRoomMessage);
+
         // Send room status back to ALL clients
         sendToAllInRoom({
           roomId,
           type: Messages.ROOM_STATUS_RESPONSE,
           payload: roomManager.getRoomStatus(roomId),
         });
+
         break;
       }
       case RoomManagerError.JOIN_ROOM_DUPLICATE_USER: {
@@ -142,6 +148,11 @@ io.on('connection', (socket: IsshoSocket) => {
       socket.leave(roomId, () => {
         if (socket.user) {
           roomManager.leaveRoom(roomId, socket.user.username);
+
+          // Handling user disconnected chat message:
+          const userLeaveRoomMessage = `${socket.user.username} left the room`;
+          roomManager.addRoomMessage(roomId, userLeaveRoomMessage);
+
           sendToAllInRoom({
             roomId,
             type: Messages.ROOM_STATUS_RESPONSE,

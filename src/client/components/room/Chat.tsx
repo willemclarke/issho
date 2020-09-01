@@ -1,9 +1,9 @@
 import React from 'react';
 import _ from 'lodash';
-import { Input, Space } from 'antd';
+import { Input } from 'antd';
 import { Messages, RoomStatus } from '../../../common/types';
 import { Socket } from 'socket.io';
-import { HeartOutlined } from '@ant-design/icons';
+import { ChatMessage } from './ChatMessage';
 
 interface Props {
   roomStatus: RoomStatus;
@@ -38,22 +38,10 @@ export const Chat = (props: Props) => {
     });
   }, []);
 
-  const connectedUsers = _.map(roomStatus.users, (user, index) => {
-    return (
-      <li key={user.username}>
-        <Space style={{ margin: '0px' }}>
-          <h4>{user.username} joined</h4> <HeartOutlined style={{ color: '#121212' }} />
-        </Space>
-      </li>
-    );
-  });
-
   const chatMessages = _.map(roomStatus.chatState.messages, (message, index) => {
     return (
       <li key={index}>
-        <h4>
-          {message.username}: {message.text}
-        </h4>
+        <ChatMessage message={message} />
       </li>
     );
   });

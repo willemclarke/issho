@@ -44,13 +44,28 @@ export interface RoomPlaylistEntry {
   addedByUsername: string;
 }
 
-interface ChatMessage {
+export enum MessageType {
+  CHAT = 'CHAT',
+  ROOM = 'ROOM',
+}
+
+export interface ChatMessage {
+  type: MessageType.CHAT;
   username: string;
   timestamp: Date;
   text: string;
 }
+
+export interface RoomMessage {
+  type: MessageType.ROOM;
+  text: string;
+  timestamp: Date;
+}
+
+export type Message = ChatMessage | RoomMessage;
+
 export interface RoomChatState {
-  messages: ChatMessage[];
+  messages: Message[];
 }
 
 export interface RoomStatus {
