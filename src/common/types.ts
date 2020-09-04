@@ -20,6 +20,7 @@ export enum Messages {
   SEND_MESSAGE_REQUEST = 'send-message-request',
   ADD_MESSAGE_RESPONSE = 'add-message-response',
   START_TYPING_REQUEST = 'start-typing-request',
+  STOPPED_TYPING_REQUEST = 'stopped-typing-reuqest',
   ADD_TYPING_RESPONSE = 'add-typing-response',
 }
 

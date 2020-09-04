@@ -58,6 +58,7 @@ export const VideoPlaylist = (props: Props) => {
       }}
     />
   );
+
   return (
     <div>
       <Title

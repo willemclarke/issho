@@ -2,10 +2,12 @@ import React from 'react';
 import _ from 'lodash';
 import useSocket from 'use-socket.io-client';
 import { Alert, Button, Col, Form, Input, Row } from 'antd';
+import { HighlightOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router';
 import { Messages } from '../../common/types';
 import { useAppContext } from '../hooks/useAppContext';
 import { useLocationQuery } from '../../client/hooks/useQuery';
+import { randomString } from '../../common/utils';
 
 export const Landing = () => {
   const { config } = useAppContext();
@@ -17,9 +19,13 @@ export const Landing = () => {
   const history = useHistory();
 
   const roomName = useLocationQuery().get('roomName');
-  const [username, setUsername] = React.useState('');
+  const [username, setUsername] = React.useState<string>('');
   const [roomId, setRoomId] = React.useState(roomName);
   const [error, setError] = React.useState<string | null>(null);
+  const [randomlyGeneratedRoomName, setRandomlyGeneratedRoomName] = React.useState<
+    string | undefined
+  >(undefined);
+  console.log('randomly generated roomName: ', randomlyGeneratedRoomName);
 
   React.useEffect(() => {
     socket.on(Messages.CAN_JOIN_ROOM_RESPONSE, (data: any) => {
@@ -35,6 +41,11 @@ export const Landing = () => {
     socket.emit(Messages.CAN_JOIN_ROOM_REQUEST, { roomId, username });
   };
 
+  const onClick = () => {
+    const generatedRoomName = _.toUpper(randomString(6));
+    setRandomlyGeneratedRoomName(generatedRoomName);
+  };
+
   const duplicateUserError = error ? <Alert message={error} type="error" banner /> : null;
 
   return (
@@ -46,10 +57,12 @@ export const Landing = () => {
               name="roomId"
               rules={[{ required: true, message: 'Please enter room name' }]}
             >
+              <Button onClick={onClick} icon={<HighlightOutlined />}></Button>;
               <Input
                 type="roomId"
                 placeholder="Enter room name"
                 onChange={(e) => setRoomId(e.target.value)}
+                value={_.isNil(randomlyGeneratedRoomName) ? roomId : randomlyGeneratedRoomName}
               />
             </Form.Item>
           ) : null}
