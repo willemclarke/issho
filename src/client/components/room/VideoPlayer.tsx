@@ -23,7 +23,7 @@ export const VideoPlayer = (props: Props) => {
       <ReactPlayer
         url={url}
         width="100%"
-        height="90%"
+        height="95%"
         style={{ backgroundColor: 'black' }}
         controls={true}
         playing={videoState.playing}
@@ -36,8 +36,6 @@ export const VideoPlayer = (props: Props) => {
           },
         }}
       />
-
-      {/* <CommandBar handlePlayAndPause={handlePlayAndPause} playing={videoState.playing} /> */}
     </>
   );
 };

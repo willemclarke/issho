@@ -172,5 +172,5 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 http.listen(port, () => {
-  console.log(`gurupu listening at http://localhost:${port}`);
+  console.log(`issho listening at http://localhost:${port}`);
 });

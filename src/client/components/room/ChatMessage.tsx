@@ -8,20 +8,21 @@ interface Props {
 
 export const ChatMessage = (props: Props) => {
   const { message } = props;
-  const relativeTime = moment(message.timestamp).format('HH:mm');
 
-  switch (message.type) {
-    case MessageType.CHAT: {
-      return (
-        <>
-          <h4>
-            {message.username}: {message.text}
-          </h4>
-        </>
-      );
+  const relativeTime = moment(message.timestamp).format('HH:mm');
+  const renderedMessage = () => {
+    switch (message.type) {
+      case MessageType.CHAT:
+        return `${message.username}: ${message.text}`;
+      case MessageType.ROOM:
+        return `${message.text}`;
     }
-    case MessageType.ROOM: {
-      return <h4>{message.text}</h4>;
-    }
-  }
+  };
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <h4>{renderedMessage()}</h4>
+      <h6 style={{ paddingLeft: '5px' }}>({relativeTime})</h6>
+    </div>
+  );
 };
