@@ -20,6 +20,7 @@ export enum Messages {
   SEND_MESSAGE_REQUEST = 'send-message-request',
   ADD_MESSAGE_RESPONSE = 'add-message-response',
   START_TYPING_REQUEST = 'start-typing-request',
+  STOPPED_TYPING_REQUEST = 'stopped-typing-reuqest',
   ADD_TYPING_RESPONSE = 'add-typing-response',
 }
 
@@ -44,13 +45,28 @@ export interface RoomPlaylistEntry {
   addedByUsername: string;
 }
 
-interface ChatMessage {
+export enum MessageType {
+  CHAT = 'CHAT',
+  ROOM = 'ROOM',
+}
+
+export interface ChatMessage {
+  type: MessageType.CHAT;
   username: string;
   timestamp: Date;
   text: string;
 }
+
+export interface RoomMessage {
+  type: MessageType.ROOM;
+  text: string;
+  timestamp: Date;
+}
+
+export type Message = ChatMessage | RoomMessage;
+
 export interface RoomChatState {
-  messages: ChatMessage[];
+  messages: Message[];
 }
 
 export interface RoomStatus {

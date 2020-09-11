@@ -2,67 +2,83 @@ import React from 'react';
 import _ from 'lodash';
 import useSocket from 'use-socket.io-client';
 import { Alert, Button, Col, Form, Input, Row } from 'antd';
+import { HighlightOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router';
 import { Messages } from '../../common/types';
 import { useAppContext } from '../hooks/useAppContext';
 import { useLocationQuery } from '../../client/hooks/useQuery';
+import { randomString } from '../../common/utils';
+import { useForm, Controller } from 'react-hook-form';
+
+interface FormValues {
+  username: string;
+  roomId: string;
+}
 
 export const Landing = () => {
   const { config } = useAppContext();
+  const { handleSubmit, control, setValue, setError, errors } = useForm<FormValues>();
+  const history = useHistory();
+  const roomName = useLocationQuery().get('roomName');
 
   const [socket] = useSocket(config.webSocketApi, {
     autoConnect: true,
     secure: config.webSocketSecure,
   });
-  const history = useHistory();
-
-  const roomName = useLocationQuery().get('roomName');
-  const [username, setUsername] = React.useState('');
-  const [roomId, setRoomId] = React.useState(roomName);
-  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     socket.on(Messages.CAN_JOIN_ROOM_RESPONSE, (data: any) => {
       if (data.error) {
-        setError(data.error);
+        setError('username', { message: data.error });
       } else {
         history.push(`/rooms/${data.roomId}?username=${data.username}`);
       }
     });
   }, [history, socket]);
 
-  const onSubmit = () => {
-    socket.emit(Messages.CAN_JOIN_ROOM_REQUEST, { roomId, username });
+  const onSubmit = (values: FormValues) => {
+    const { roomId, username } = values;
+    socket.emit(Messages.CAN_JOIN_ROOM_REQUEST, { roomId: roomName || roomId, username });
   };
 
-  const duplicateUserError = error ? <Alert message={error} type="error" banner /> : null;
+  const onClick = () => {
+    const generatedRoomName = _.toUpper(randomString(6));
+    setValue('roomId', generatedRoomName);
+  };
+
+  const UserErrors = () => (
+    <>
+      {_.map(errors, (error, key) => (
+        <Alert message={error?.message} type="error" banner />
+      ))}
+    </>
+  );
 
   return (
-    <Row justify="center" style={{ marginTop: '2rem' }}>
-      <Col xs={4} xxl={5}>
-        <Form name="landing" className="landing-form" onFinish={onSubmit}>
-          {_.isNil(roomName) ? (
-            <Form.Item
-              name="roomId"
-              rules={[{ required: true, message: 'Please enter room name' }]}
-            >
-              <Input
-                type="roomId"
-                placeholder="Enter room name"
-                onChange={(e) => setRoomId(e.target.value)}
+    <>
+      <UserErrors />
+      <Row justify="center" style={{ marginTop: '2rem' }}>
+        <Col xs={4} xxl={5}>
+          <form name="landing" className="landing-form" onSubmit={handleSubmit(onSubmit)}>
+            {_.isNil(roomName) ? (
+              <Controller
+                control={control}
+                name={'roomId'}
+                rules={{ required: 'Please enter room name' }}
+                as={
+                  <Input
+                    placeholder="Enter room name"
+                    addonAfter={<HighlightOutlined onClick={onClick} />}
+                  />
+                }
               />
-            </Form.Item>
-          ) : null}
-          <Form.Item name="username" rules={[{ required: true, message: 'Please enter username' }]}>
-            <Input
-              placeholder="Enter username"
-              onChange={(e) => {
-                setUsername(e.target.value);
-              }}
+            ) : null}
+            <Controller
+              control={control}
+              name={'username'}
+              rules={{ required: 'Please enter username' }}
+              as={<Input placeholder="Enter username" />}
             />
-          </Form.Item>
-          {duplicateUserError}
-          <Form.Item>
             <Button
               type="primary"
               htmlType="submit"
@@ -71,9 +87,9 @@ export const Landing = () => {
             >
               Join Room
             </Button>
-          </Form.Item>
-        </Form>
-      </Col>
-    </Row>
+          </form>
+        </Col>
+      </Row>
+    </>
   );
 };
