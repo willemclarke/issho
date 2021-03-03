@@ -15,3 +15,7 @@ This project is a clone/remix of the popular website 'watch2gether'. You can wat
 - Basic usage of express
 - Antd
 - Deploying an app to heroku
+
+## Example of what it looks like
+
+<img src="https://i.ibb.co/L6VPYD1/Screen-Shot-2021-03-03-at-12-14-46-pm.png">

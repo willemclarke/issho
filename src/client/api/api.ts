@@ -49,7 +49,7 @@ export async function youtubeSearch(
     url: 'https://www.googleapis.com/youtube/v3/search',
     qs: {
       part: 'snippet',
-      maxResults: 1,
+      maxResults: 5,
       q: query,
       key: token,
       pageToken,
